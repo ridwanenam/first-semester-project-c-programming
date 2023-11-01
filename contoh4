@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char code[4];
+    double exchangeRate;
+} Currency;
+
+typedef struct {
+    char name[100];
+    double price;
+    int quantity;
+} Product;
+
+typedef struct {
+    char username[100];
+    char password[100];
+} Admin;
+
+double convertToLocalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
+    return amount * (localCurrency.exchangeRate / globalCurrency.exchangeRate);
+}
+
+double convertToGlobalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
+    return amount * (globalCurrency.exchangeRate / localCurrency.exchangeRate);
+}
+
+Product* createProduct(const char* name, double price, int quantity) {
+    Product* product = (Product*)malloc(sizeof(Product));
+    if (product) {
+        strcpy(product->name, name);
+        product->price = price;
+        product->quantity = quantity;
+    }
+    return product;
+}
+
+double calculateTotalCost(Product* products[], int numProducts) {
+    double totalCost = 0;
+    for (int i = 0; i < numProducts; i++) {
+        totalCost += products[i]->price * products[i]->quantity;
+    }
+    return totalCost;
+}
+
+int main() {
+    Currency usd = {"USD", 1.0};
+    Currency idr = {"IDR", 0.000071};
+
+    Admin admin = {"admin", "password123"}; // Admin login credentials
+
+    char username[100];
+    char password[100];
+
+    printf("Masukkan username admin: ");
+    scanf("%s", username);
+    printf("Masukkan password admin: ");
+    scanf("%s", password);
+
+    if (strcmp(username, admin.username) == 0 && strcmp(password, admin.password) == 0) {
+        printf("Selamat datang, %s!\n", username);
+
+        // Contoh penggunaan manajemen data barang
+        Product* products[3];
+        for (int i = 0; i < 3; i++) {
+            char name[100];
+            double price;
+            int quantity;
+
+            printf("Masukkan nama barang: ");
+            scanf("%s", name);
+            printf("Masukkan harga barang: ");
+            scanf("%lf", &price);
+            printf("Masukkan jumlah barang: ");
+            scanf("%d", &quantity);
+
+            products[i] = createProduct(name, price, quantity);
+        }
+
+        // Contoh penggunaan perhitungan biaya
+        double totalCost = calculateTotalCost(products, 3);
+        printf("Total biaya: %.2lf USD\n", totalCost);
+    } else {
+        printf("Login gagal. Akun admin tidak valid.\n");
+    }
+
+    return 0;
+}
