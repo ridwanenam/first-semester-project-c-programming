@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Struktur data untuk menyimpan informasi mata uang
+typedef struct {
+    char code[4];
+    double exchangeRate;
+} Currency;
+
+// Struktur data untuk menyimpan informasi barang
+typedef struct {
+    char name[100];
+    double price;
+    int quantity;
+} Product;
+
+// Fungsi untuk konversi kurs dari mata uang global ke mata uang lokal
+double convertToLocalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
+    return amount * (localCurrency.exchangeRate / globalCurrency.exchangeRate);
+}
+
+// Fungsi untuk konversi kurs dari mata uang lokal ke mata uang global
+double convertToGlobalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
+    return amount * (globalCurrency.exchangeRate / localCurrency.exchangeRate);
+}
+
+// Fungsi untuk mengelola data barang
+Product* createProduct(const char* name, double price, int quantity) {
+    Product* product = (Product*)malloc(sizeof(Product));
+    if (product) {
+        strcpy(product->name, name);
+        product->price = price;
+        product->quantity = quantity;
+    }
+    return product;
+}
+
+// Fungsi untuk menghitung biaya total
+double calculateTotalCost(Product* products[], int numProducts) {
+    double totalCost = 0;
+    for (int i = 0; i < numProducts; i++) {
+        totalCost += products[i]->price * products[i]->quantity;
+    }
+    return totalCost;
+}
+
+int main() {
+    Currency usd = {"USD", 1.0}; // Mata uang global (USD)
+    Currency idr = {"IDR", 0.000071}; // Mata uang lokal (IDR)
+
+    // Contoh penggunaan fungsi konversi kurs
+    double amountInUSD = 1000.0;
+    double amountInIDR = convertToLocalCurrency(amountInUSD, usd, idr);
+    printf("1000 USD setara dengan %.2lf IDR\n", amountInIDR);
+
+    // Contoh penggunaan manajemen data barang
+    Product* products[3];
+    products[0] = createProduct("Product 1", 10.0, 5);
+    products[1] = createProduct("Product 2", 15.0, 3);
+    products[2] = createProduct("Product 3", 20.0, 2);
+
+    // Contoh penggunaan perhitungan biaya
+    double totalCost = calculateTotalCost(products, 3);
+    printf("Total biaya: %.2lf USD\n", totalCost);
+
+    // Selanjutnya, Anda dapat menambahkan lebih banyak fitur sesuai kebutuhan seperti manajemen pelanggan, pelacakan pengiriman, dan sebagainya.
+    
+    // Ingatlah untuk membebaskan memori yang dialokasikan menggunakan free(products[i]) dan lain-lain untuk mencegah kebocoran memori.
+    
+    return 0;
+}
