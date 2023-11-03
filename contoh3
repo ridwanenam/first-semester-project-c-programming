@@ -2,30 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Struktur data untuk menyimpan informasi mata uang
 typedef struct {
     char code[4];
     double exchangeRate;
 } Currency;
 
-// Struktur data untuk menyimpan informasi barang
 typedef struct {
     char name[100];
     double price;
     int quantity;
 } Product;
 
-// Fungsi untuk konversi kurs dari mata uang global ke mata uang lokal
+typedef struct {
+    char username[100];
+    char password[100];
+} User;
+
+typedef struct {
+    char username[100];
+    char password[100];
+} Admin;
+
 double convertToLocalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
     return amount * (localCurrency.exchangeRate / globalCurrency.exchangeRate);
 }
 
-// Fungsi untuk konversi kurs dari mata uang lokal ke mata uang global
 double convertToGlobalCurrency(double amount, Currency globalCurrency, Currency localCurrency) {
     return amount * (globalCurrency.exchangeRate / localCurrency.exchangeRate);
 }
 
-// Fungsi untuk mengelola data barang
 Product* createProduct(const char* name, double price, int quantity) {
     Product* product = (Product*)malloc(sizeof(Product));
     if (product) {
@@ -36,7 +41,6 @@ Product* createProduct(const char* name, double price, int quantity) {
     return product;
 }
 
-// Fungsi untuk menghitung biaya total
 double calculateTotalCost(Product* products[], int numProducts) {
     double totalCost = 0;
     for (int i = 0; i < numProducts; i++) {
@@ -46,27 +50,71 @@ double calculateTotalCost(Product* products[], int numProducts) {
 }
 
 int main() {
-    Currency usd = {"USD", 1.0}; // Mata uang global (USD)
-    Currency idr = {"IDR", 0.000071}; // Mata uang lokal (IDR)
+    Currency usd = {"USD", 1.0};
+    Currency idr = {"IDR", 0.000071};
 
-    // Contoh penggunaan fungsi konversi kurs
-    double amountInUSD = 1000.0;
-    double amountInIDR = convertToLocalCurrency(amountInUSD, usd, idr);
-    printf("1000 USD setara dengan %.2lf IDR\n", amountInIDR);
+    Admin admin = {"admin", "password123"}; // Admin login credentials
+    User user; // Informasi pengguna
+    int userType; // Tipe pengguna (admin atau user)
 
-    // Contoh penggunaan manajemen data barang
-    Product* products[3];
-    products[0] = createProduct("Product 1", 10.0, 5);
-    products[1] = createProduct("Product 2", 15.0, 3);
-    products[2] = createProduct("Product 3", 20.0, 2);
+    char username[100];
+    char password[100];
 
-    // Contoh penggunaan perhitungan biaya
-    double totalCost = calculateTotalCost(products, 3);
-    printf("Total biaya: %.2lf USD\n", totalCost);
+    printf("Masukkan tipe pengguna (1 untuk admin, 2 untuk user): ");
+    scanf("%d", &userType);
 
-    // Selanjutnya, Anda dapat menambahkan lebih banyak fitur sesuai kebutuhan seperti manajemen pelanggan, pelacakan pengiriman, dan sebagainya.
-    
-    // Ingatlah untuk membebaskan memori yang dialokasikan menggunakan free(products[i]) dan lain-lain untuk mencegah kebocoran memori.
-    
+    if (userType == 1) {
+        printf("Masukkan username admin: ");
+        scanf("%s", username);
+        printf("Masukkan password admin: ");
+        scanf("%s", password);
+
+        if (strcmp(username, admin.username) == 0 && strcmp(password, admin.password) == 0) {
+            printf("Selamat datang, %s (admin)!\n", username);
+
+            // Contoh penggunaan manajemen data barang
+            int numProducts = 0;
+            Product* products[10]; // Maksimum 10 produk
+
+            while (1) {
+                char name[100];
+                double price;
+                int quantity;
+
+                printf("Masukkan nama barang (atau ketik 'selesai' untuk keluar): ");
+                scanf("%s", name);
+
+                if (strcmp(name, "selesai") == 0) {
+                    break;
+                }
+
+                printf("Masukkan harga barang: ");
+                scanf("%lf", &price);
+                printf("Masukkan jumlah barang: ");
+                scanf("%d", &quantity);
+
+                products[numProducts] = createProduct(name, price, quantity);
+                numProducts++;
+            }
+
+            // Contoh penggunaan perhitungan biaya
+            double totalCost = calculateTotalCost(products, numProducts);
+            printf("Total biaya: %.2lf USD\n", totalCost);
+        } else {
+            printf("Login gagal. Akun admin tidak valid.\n");
+            return 1; // Keluar dari program jika login admin gagal
+        }
+    } else if (userType == 2) {
+        printf("Masukkan username pengguna: ");
+        scanf("%s", user.username);
+        printf("Masukkan password pengguna: ");
+        scanf("%s", user.password);
+
+        printf("Selamat datang, %s (user)!\n", user.username);
+    } else {
+        printf("Tipe pengguna tidak valid. Program berhenti.\n");
+        return 1; // Keluar dari program jika tipe pengguna tidak valid
+    }
+
     return 0;
 }
