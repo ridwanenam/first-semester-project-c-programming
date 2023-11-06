@@ -1,0 +1,79 @@
+#include <stdio.h>
+
+int main() {
+    int choice;
+    float konversiJumlah, hasilKonversi, totalBiaya, pajak;
+    char operasiDataBarang;
+    float hargaBarang, jumlahBarang;
+
+    do {
+        printf("\nMenu User:\n");
+        printf("1. Konversi kurs mata uang\n");
+        printf("2. Manajemen data barang\n");
+        printf("3. Perhitungan biaya dan pajak\n");
+        printf("4. Keluar\n");
+        printf("Pilih menu (1-4): ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Masukkan jumlah mata uang global: ");
+                scanf("%f", &konversiJumlah);
+                printf("Pilih jenis konversi (1. Global ke lokal, 2. Lokal ke global): ");
+                int jenisKonversi;
+                scanf("%d", &jenisKonversi);
+                // Implementasi perhitungan konversi berdasarkan jenisKonversi
+                if (jenisKonversi == 1) {
+                    // Implementasi konversi dari global ke lokal
+                    hasilKonversi = konversiJumlah * kursGlobalKeLokal;
+                } else if (jenisKonversi == 2) {
+                    // Implementasi konversi dari lokal ke global
+                    hasilKonversi = konversiJumlah * kursLokalKeGlobal;
+                }
+                printf("Hasil konversi: %f\n", hasilKonversi);
+                break;
+            
+            case 2:
+                printf("Pilih operasi (T: Tambah, H: Hapus, E: Edit, L: Lihat): ");
+                scanf(" %c", &operasiDataBarang);
+
+                // Implementasi operasi data barang berdasarkan operasiDataBarang
+                if (operasiDataBarang == 'T' || operasiDataBarang == 't') {
+                    printf("Masukkan nama barang: ");
+                    char namaBarang[100];
+                    scanf("%s", namaBarang);
+                    printf("Masukkan harga barang: ");
+                    scanf("%f", &hargaBarang);
+                    printf("Masukkan jumlah barang: ");
+                    scanf("%f", &jumlahBarang);
+                    // Implementasi tambah data barang
+                } else if (operasiDataBarang == 'H' || operasiDataBarang == 'h') {
+                    // Implementasi hapus data barang
+                } else if (operasiDataBarang == 'E' || operasiDataBarang == 'e') {
+                    // Implementasi edit data barang
+                } else if (operasiDataBarang == 'L' || operasiDataBarang == 'l') {
+                    // Implementasi lihat data barang
+                } else {
+                    printf("Operasi tidak valid.\n");
+                }
+                break;
+
+            case 3:
+                // Implementasi perhitungan biaya dan pajak
+                totalBiaya = // Hitung total biaya berdasarkan data barang dan harga
+                pajak = // Hitung pajak
+                printf("Total biaya: %f\n", totalBiaya);
+                printf("Pajak: %f\n", pajak);
+                break;
+
+            case 4:
+                printf("Keluar dari program.\n");
+                break;
+
+            default:
+                printf("Pilihan menu tidak valid.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
