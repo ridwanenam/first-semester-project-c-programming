@@ -1,0 +1,369 @@
+#include <stdio.h>
+#include <string.h>
+#define MAX_BARANG 100  // Anda dapat mengganti angka 100 sesuai dengan kebutuhan
+#define MAX_PENGGUNA 100 // Anda dapat mengganti angka 100 sesuai dengan kebutuhan
+#define MAX_LAPORAN 100 // Anda dapat mengganti angka 100 sesuai dengan kebutuhan
+
+// Fungsi untuk validasi admin
+int ValidasiAdmin(char username[100], char password[100]) {
+    // Misalkan Anda memiliki daftar admin dan kata sandi admin dalam bentuk array
+    char daftarAdmin[3][100] = {"admin1", "admin2", "admin3"};
+    char kataSandiAdmin[3][100] = {"password1", "password2", "password3"};
+    
+    int jumlahAdmin = 3; // Jumlah admin dalam daftar
+    
+    // Periksa apakah pasangan nama pengguna dan kata sandi cocok dengan salah satu admin
+    for (int i = 0; i < jumlahAdmin; i++) {
+        if (strcmp(username, daftarAdmin[i]) == 0 && strcmp(password, kataSandiAdmin[i]) == 0) {
+            return 1; // Pasangan nama pengguna dan kata sandi valid
+        }
+    }
+    
+    return 0; // Pasangan nama pengguna dan kata sandi tidak valid
+}
+
+
+// Fungsi untuk validasi user
+int ValidasiUser(char username[100], char password[100]) {
+    // Misalkan Anda memiliki daftar pengguna dan kata sandi pengguna dalam bentuk array
+    char daftarPengguna[3][100] = {"user1", "user2", "user3"};
+    char kataSandiPengguna[3][100] = {"password1", "password2", "password3"};
+    
+    int jumlahPengguna = 3; // Jumlah pengguna dalam daftar
+    
+    // Periksa apakah pasangan nama pengguna dan kata sandi cocok dengan salah satu pengguna
+    for (int i = 0; i < jumlahPengguna; i++) {
+        if (strcmp(username, daftarPengguna[i]) == 0 && strcmp(password, kataSandiPengguna[i]) == 0) {
+            return 1; // Pasangan nama pengguna dan kata sandi valid
+        }
+    }
+    
+    return 0; // Pasangan nama pengguna dan kata sandi tidak valid
+}
+
+
+// Fungsi untuk menampilkan data barang import
+void TampilkanDataBarangImport() {
+    // Misalkan Anda memiliki data barang impor dalam array atau struktur data
+    // Anda bisa menggantikan ini dengan akses ke database atau sumber data lainnya
+
+    // Contoh data barang impor dalam bentuk array 2D
+    char barangImpor[3][100] = {
+        {"Barang1", "Deskripsi Barang 1", "Harga 100 USD"},
+        {"Barang2", "Deskripsi Barang 2", "Harga 150 USD"},
+        {"Barang3", "Deskripsi Barang 3", "Harga 200 USD"}
+    };
+    
+    int jumlahBarang = 3; // Jumlah barang impor dalam daftar
+    
+    printf("Data Barang Import:\n");
+    for (int i = 0; i < jumlahBarang; i++) {
+        printf("%d. Nama: %s\n", i + 1, barangImpor[i][0]);
+        printf("   Deskripsi: %s\n", barangImpor[i][1]);
+        printf("   Harga: %s\n", barangImpor[i][2]);
+        printf("\n");
+    }
+}
+
+
+// Fungsi untuk memilih barang import
+int BarangDipilih() {
+    // Misalkan Anda memiliki data barang impor dalam array atau struktur data
+    // Anda bisa menggantikan ini dengan akses ke database atau sumber data lainnya
+
+    // Contoh data barang impor dalam bentuk array 2D
+    char barangImpor[3][100] = {
+        {"Barang1", "Deskripsi Barang 1", "Harga 100 USD"},
+        {"Barang2", "Deskripsi Barang 2", "Harga 150 USD"},
+        {"Barang3", "Deskripsi Barang 3", "Harga 200 USD"}
+    };
+
+    int jumlahBarang = 3; // Jumlah barang impor dalam daftar
+
+    printf("Pilih barang impor (masukkan nomor): ");
+    int nomorBarang;
+    scanf("%d", &nomorBarang);
+
+    // Periksa apakah nomor barang yang dipilih valid
+    if (nomorBarang >= 1 && nomorBarang <= jumlahBarang) {
+        printf("Anda telah memilih barang: %s\n", barangImpor[nomorBarang - 1][0]);
+        // Anda dapat melakukan lebih banyak logika di sini, seperti perhitungan biaya
+        return nomorBarang - 1; // Mengembalikan indeks barang yang dipilih
+    } else {
+        printf("Nomor barang yang dipilih tidak valid.\n");
+        return -1; // Mengembalikan -1 untuk menunjukkan pemilihan tidak valid
+    }
+}
+
+
+
+// Fungsi untuk menghitung biaya import
+float HitungBiayaImport(char barangImpor[3][100], int indeksBarang) {
+    // Anda dapat menambahkan logika perhitungan biaya impor di sini
+    // Misalnya, berdasarkan harga barang yang telah dipilih
+    float biayaImpor = 0.0;
+
+    // Daftar harga barang impor dalam contoh data
+    float hargaBarang[3] = {100.0, 150.0, 200.0};
+
+    // Pastikan indeks barang yang dipilih valid
+    if (indeksBarang >= 0 && indeksBarang < 3) {
+        biayaImpor = hargaBarang[indeksBarang] * 1.1; // Misalnya, biaya 10% dari harga barang
+    }
+
+    return biayaImpor;
+}
+
+
+// Struktur data untuk menyimpan informasi barang import
+struct BarangImport {
+    char nama[100];
+    char deskripsi[100];
+    float harga;
+};
+
+// Fungsi untuk menyimpan barang import
+void SimpanBarangImport(struct BarangImport barang, struct BarangImport daftarBarang[], int *jumlahBarang) {
+    if (*jumlahBarang < MAX_BARANG) {
+        // Tambahkan barang import ke dalam daftar
+        daftarBarang[*jumlahBarang] = barang;
+        (*jumlahBarang)++;
+
+        printf("Barang import berhasil disimpan.\n");
+    } else {
+        printf("Daftar barang import penuh. Tidak dapat menyimpan lagi.\n");
+    }
+}
+
+
+// Struktur data untuk menyimpan informasi barang ekspor
+struct BarangExport {
+    char nama[100];
+    char deskripsi[100];
+    float harga;
+    int stok;
+};
+
+// Fungsi untuk menambah barang ekspor
+void TambahBarangExport(struct BarangExport daftarBarang[], int *jumlahBarang) {
+    if (*jumlahBarang < MAX_BARANG) {
+        struct BarangExport barang;
+
+        printf("Masukkan nama barang ekspor: ");
+        scanf("%s", barang.nama);
+        printf("Masukkan deskripsi barang: ");
+        scanf("%s", barang.deskripsi);
+        printf("Masukkan harga barang: ");
+        scanf("%f", &barang.harga);
+        printf("Masukkan stok barang: ");
+        scanf("%d", &barang.stok);
+
+        // Tambahkan barang ekspor ke dalam daftar
+        daftarBarang[*jumlahBarang] = barang;
+        (*jumlahBarang)++;
+
+        printf("Barang ekspor berhasil ditambahkan ke daftar.\n");
+    } else {
+        printf("Daftar barang ekspor penuh. Tidak dapat menambahkan lagi.\n");
+    }
+}
+
+
+// Fungsi untuk menambah harga barang ekspor
+void TambahHargaExport(struct BarangExport daftarBarang[], int jumlahBarang) {
+    if (jumlahBarang > 0) {
+        char namaBarang[100];
+        int indeksBarang = -1;
+
+        printf("Masukkan nama barang yang akan diberikan penambahan harga: ");
+        scanf("%s", namaBarang);
+
+        // Cari barang dengan nama yang cocok dalam daftar
+        for (int i = 0; i < jumlahBarang; i++) {
+            if (strcmp(namaBarang, daftarBarang[i].nama) == 0) {
+                indeksBarang = i;
+                break;
+            }
+        }
+
+        if (indeksBarang != -1) {
+            float penambahanHarga;
+            printf("Masukkan jumlah penambahan harga: ");
+            scanf("%f", &penambahanHarga);
+
+            // Tambahkan harga ke barang yang sesuai
+            daftarBarang[indeksBarang].harga += penambahanHarga;
+
+            printf("Harga barang %s telah ditingkatkan. Harga sekarang: %.2f\n", namaBarang, daftarBarang[indeksBarang].harga);
+        } else {
+            printf("Barang dengan nama %s tidak ditemukan dalam daftar.\n", namaBarang);
+        }
+    } else {
+        printf("Daftar barang ekspor kosong. Tidak dapat menambahkan harga.\n");
+    }
+}
+
+
+// Fungsi untuk menambah stok barang ekspor
+void TambahStokExport(struct BarangExport daftarBarang[], int jumlahBarang) {
+    if (jumlahBarang > 0) {
+        char namaBarang[100];
+        int indeksBarang = -1;
+
+        printf("Masukkan nama barang yang akan ditambahkan stok: ");
+        scanf("%s", namaBarang);
+
+        // Cari barang dengan nama yang cocok dalam daftar
+        for (int i = 0; i < jumlahBarang; i++) {
+            if (strcmp(namaBarang, daftarBarang[i].nama) == 0) {
+                indeksBarang = i;
+                break;
+            }
+        }
+
+        if (indeksBarang != -1) {
+            int penambahanStok;
+            printf("Masukkan jumlah penambahan stok: ");
+            scanf("%d", &penambahanStok);
+
+            // Tambahkan stok ke barang yang sesuai
+            daftarBarang[indeksBarang].stok += penambahanStok;
+
+            printf("Stok barang %s telah ditingkatkan. Stok sekarang: %d\n", namaBarang, daftarBarang[indeksBarang].stok);
+        } else {
+            printf("Barang dengan nama %s tidak ditemukan dalam daftar.\n", namaBarang);
+        }
+    } else {
+        printf("Daftar barang ekspor kosong. Tidak dapat menambahkan stok.\n");
+    }
+}
+
+
+// Struktur data untuk menyimpan informasi barang ekspor
+struct BarangExport {
+    char nama[100];
+    char deskripsi[100];
+    float harga;
+    int stok;
+};
+
+// Fungsi untuk menyimpan barang ekspor
+void SimpanBarangExport(struct BarangExport barang, struct BarangExport daftarBarang[], int *jumlahBarang) {
+    if (*jumlahBarang < MAX_BARANG) {
+        // Tambahkan barang ekspor ke dalam daftar
+        daftarBarang[*jumlahBarang] = barang;
+        (*jumlahBarang)++;
+
+        printf("Barang ekspor berhasil disimpan ke dalam daftar.\n");
+    } else {
+        printf("Daftar barang ekspor penuh. Tidak dapat menyimpan lebih banyak.\n");
+    }
+}
+
+
+// Struktur data untuk menyimpan informasi pengguna
+struct Pengguna {
+    char nama[100];
+};
+
+// Fungsi untuk menampilkan daftar pengguna
+void TampilkanDaftarPengguna(struct Pengguna daftarPengguna[], int jumlahPengguna) {
+    if (jumlahPengguna > 0) {
+        printf("Daftar Pengguna:\n");
+        for (int i = 0; i < jumlahPengguna; i++) {
+            printf("%d. Nama Pengguna: %s\n", i + 1, daftarPengguna[i].nama);
+        }
+    } else {
+        printf("Tidak ada pengguna terdaftar.\n");
+    }
+}
+
+
+// Struktur data untuk laporan impor
+struct LaporanImpor {
+    char namaUser[100];
+    char namaBarang[100];
+    int jumlahBarang;
+    float hargaTotal;
+};
+
+// Fungsi untuk menampilkan laporan impor
+void TampilkanLaporanImpor(struct LaporanImpor laporanImpor[], int jumlahLaporan) {
+    if (jumlahLaporan > 0) {
+        printf("Laporan Impor:\n");
+        for (int i = 0; i < jumlahLaporan; i++) {
+            printf("Nama User: %s\n", laporanImpor[i].namaUser);
+            printf("Nama Barang: %s\n", laporanImpor[i].namaBarang);
+            printf("Jumlah Barang: %d\n", laporanImpor[i].jumlahBarang);
+            printf("Harga Total: %.2f\n", laporanImpor[i].hargaTotal);
+            printf("-----------------\n");
+        }
+    } else {
+        printf("Tidak ada laporan impor yang tersedia.\n");
+    }
+}
+
+
+// Struktur data untuk laporan ekspor
+struct LaporanEkspor {
+    char namaUser[100];
+    char namaBarang[100];
+    int jumlahBarang;
+    float hargaTotal;
+};
+
+// Fungsi untuk menampilkan laporan ekspor
+void TampilkanLaporanEkspor(struct LaporanEkspor laporanEkspor[], int jumlahLaporan) {
+    if (jumlahLaporan > 0) {
+        printf("Laporan Ekspor:\n");
+        for (int i = 0; i < jumlahLaporan; i++) {
+            printf("Nama User: %s\n", laporanEkspor[i].namaUser);
+            printf("Nama Barang: %s\n", laporanEkspor[i].namaBarang);
+            printf("Jumlah Barang: %d\n", laporanEkspor[i].jumlahBarang);
+            printf("Harga Total: %.2f\n", laporanEkspor[i].hargaTotal);
+            printf("-----------------\n");
+        }
+    } else {
+        printf("Tidak ada laporan ekspor yang tersedia.\n");
+    }
+}
+
+
+int main() {
+    char JenisPengguna[100];
+    char Username[100];
+    char Password[100];
+    int PilihanMenuAdmin, PilihanMenuUser, OperasiDataBarangImport, OperasiDataBarangExport, OperasiPengguna, OperasiLaporan, OperasiSistem;
+
+    printf("Selamat datang di Sistem Ekspor-Impor\n");
+    printf("Pilih jenis pengguna (Admin/User): ");
+    scanf("%s", JenisPengguna);
+
+    if (strcmp(JenisPengguna, "Admin") == 0) {
+        printf("Masukkan username: ");
+        scanf("%s", Username);
+        printf("Masukkan password: ");
+        scanf("%s", Password);
+
+        if (ValidasiAdmin(Username, Password)) {
+            printf("Login berhasil sebagai Admin\n");
+            // JalankanMenuAdmin();
+        } else {
+            printf("Login gagal\n");
+        }
+    } else if (strcmp(JenisPengguna, "User") == 0) {
+        printf("Masukkan username: ");
+        scanf("%s", Username);
+        printf("Masukkan password: ");
+        scanf("%s", Password);
+
+        if (ValidasiUser(Username, Password)) {
+            printf("Login berhasil sebagai User\n");
+            // JalankanMenuUser();
+        } else {
+            printf("Login gagal\n");
+        }
+    }
+
+    return 0;
+}
