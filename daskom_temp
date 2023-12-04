@@ -342,7 +342,7 @@ void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPela
 
     if (pelangganIndex != -1) {
         if (dataPelanggan[pelangganIndex].saldo > 0) {
-            printf("Jenis laundry (Contoh: Cuci Kiloan): ");
+            printf("Jenis laundry (Contoh: Cuci Kiloan Reguler): ");
             scanf("%s", dataLaundry[*jumlahLaundry].jenis);
             printf("Durasi laundry (dalam hari): ");
             scanf("%d", &dataLaundry[*jumlahLaundry].durasi);
