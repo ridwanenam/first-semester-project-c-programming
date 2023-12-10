@@ -16,6 +16,7 @@ typedef struct {
     char username[50];
     char password[50];
     double saldo;
+    int frekuensi;
 } Pelanggan;
 
 typedef struct {
@@ -30,26 +31,30 @@ typedef struct {
 int pelangganIndexLogin = -1; // Variabel global untuk menyimpan indeks pelanggan yang sedang login
 
 
-// Sudah sesuai antara urutan deklarasi fungsi dengan fungsi-fungsinya
+// Urutan deklarasi fungsi dengan fungsi-fungsinya
 void bersihkanLayar();
+
 void simpanDataPelanggan(Pelanggan *pelanggan, int jumlahPelanggan);
 void bacaDataPelanggan(Pelanggan *pelanggan, int *jumlahPelanggan);
 void simpanDataLaundry(Laundry *laundry, int jumlahLaundry);
 void bacaDataLaundry(Laundry *laundry, int *jumlahLaundry);
+
 void loginAdmin(Pelanggan *dataPelanggan, Laundry *dataLaundry, int *jumlahPelanggan, int *jumlahLaundry);
 void loginPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int *jumlahPelanggan, int *jumlahLaundry);
 void daftarPelanggan(Pelanggan *dataPelanggan, int *jumlahPelanggan);
 int cekUsernamePelanggan(Pelanggan *dataPelanggan, int jumlahPelanggan, const char *username);
 int cekLoginPelanggan(Pelanggan *dataPelanggan, int jumlahPelanggan, const char *username, const char *password);
-void isiSaldo(Pelanggan *dataPelanggan, int jumlahPelanggan);
+
+void isiSaldo(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry);
 void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int *jumlahLaundry);
-double hitungHargaLaundry(const char *jenisLaundry, double berat);
 void lihatStatusLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry);
 void cekHarga();
+
 void hapusPelanggan(Pelanggan *dataPelanggan, int *jumlahPelanggan);
 void lihatPendapatan(Laundry *dataLaundry, int jumlahLaundry);
-void perbaruiStatusLaundry(Laundry *dataLaundry, int jumlahLaundry);
+void perbaruiStatusLaundry(Laundry *dataLaundry, Pelanggan *dataPelanggan, int jumlahLaundry);
 void lihatHistoriPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry);
+
 void tampilkanMenuAdmin();
 void tampilkanMenuPelanggan();
 
@@ -111,7 +116,8 @@ int main() {
 }
 
 
-//Memulai fungsi-fungsi yang ada
+//==============Memulai fungsi-fungsi yang ada=================
+
 void bersihkanLayar() {
 #ifdef _WIN32
     system("cls");
@@ -214,7 +220,7 @@ void loginAdmin(Pelanggan *dataPelanggan, Laundry *dataLaundry, int *jumlahPelan
                 lihatPendapatan(dataLaundry, *jumlahLaundry);
                 break;
             case 3:
-                perbaruiStatusLaundry(dataLaundry, *jumlahLaundry);
+                perbaruiStatusLaundry(dataLaundry, dataPelanggan, *jumlahLaundry);
                 break;
             case 4:
                 lihatHistoriPelanggan(dataPelanggan, dataLaundry, *jumlahPelanggan, *jumlahLaundry);
@@ -273,7 +279,7 @@ void loginPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int *jumlahP
 
         switch (opsiPelanggan) {
             case 1:
-                isiSaldo(dataPelanggan, *jumlahPelanggan);
+                isiSaldo(dataPelanggan, dataLaundry, *jumlahPelanggan, jumlahLaundry);
                 break;
             case 2:
                 setorLaundry(dataPelanggan, dataLaundry, *jumlahPelanggan, jumlahLaundry);
@@ -341,14 +347,44 @@ int cekLoginPelanggan(Pelanggan *dataPelanggan, int jumlahPelanggan, const char 
 
 
 // Modifikasi fungsi isiSaldo
-void isiSaldo(Pelanggan *dataPelanggan, int jumlahPelanggan) {
+void isiSaldo(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     if (pelangganIndexLogin != -1) {
-        // Gunakan pelangganIndexLogin untuk mengakses data pelanggan yang sedang login
+        // Menggunakan variabel sementara untuk menyimpan jumlah saldo yang ingin diisi
+        double jumlahSaldoDitambahkan;
+
+        // Menerima input saldo yang ingin diisi
         printf("Masukkan jumlah saldo yang ingin diisi: ");
-        double saldo;
-        scanf("%lf", &saldo);
-        dataPelanggan[pelangganIndexLogin].saldo += saldo;
-        printf("Saldo berhasil diisi. Saldo sekarang: %.2lf\n", dataPelanggan[pelangganIndexLogin].saldo);
+        scanf("%lf", &jumlahSaldoDitambahkan);
+
+        // Menggunakan variabel sementara untuk menghitung total harga laundry yang belum dibayar
+        double totalHargaLaundryBelumDibayar = 0.0;
+
+        // Menghitung total harga laundry yang belum dibayar
+        for (int i = 0; i < jumlahLaundry; i++) {
+            if (strcmp(dataPelanggan[pelangganIndexLogin].username, dataLaundry[i].jenis) == 0 &&
+                dataLaundry[i].status == BELUM_DIKONFIRMASI) {
+                totalHargaLaundryBelumDibayar += dataLaundry[i].harga;
+            }
+        }
+
+        // Mengecek apakah saldo mencukupi untuk membayar total harga laundry yang belum dibayar
+        if (jumlahSaldoDitambahkan >= totalHargaLaundryBelumDibayar) {
+            // Mengurangkan saldo
+            dataPelanggan[pelangganIndexLogin].saldo += jumlahSaldoDitambahkan - totalHargaLaundryBelumDibayar;
+
+            // Menandai status laundry yang sudah dibayar
+            for (int i = 0; i < jumlahLaundry; i++) {
+                if (strcmp(dataPelanggan[pelangganIndexLogin].username, dataLaundry[i].jenis) == 0 &&
+                    dataLaundry[i].status == BELUM_DIKONFIRMASI) {
+                    dataLaundry[i].status = SEDANG_DIKERJAKAN;
+                }
+            }
+
+            printf("Saldo berhasil diisi dan laundry berhasil disetor. Saldo sekarang: %.2lf\n",
+                   dataPelanggan[pelangganIndexLogin].saldo);
+        } else {
+            printf("Saldo tidak mencukupi untuk membayar total harga laundry yang belum dibayar.\n");
+        }
     } else {
         printf("Anda belum login sebagai pelanggan.\n");
     }
@@ -361,99 +397,77 @@ void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPela
         return;
     }
 
-    if (dataPelanggan[pelangganIndexLogin].saldo > 0) {
-        // Memastikan *jumlahLaundry tidak melebihi MAX_LAUNDRY
-        if (*jumlahLaundry < MAX_LAUNDRY) {
-            printf("Pilih jenis laundry:\n");
-            printf("===Cuci Kiloan===\n");
-            printf("1. Cuci Kiloan Reguler\n");
-            printf("2. Cuci Kiloan Express\n");
-            printf("===HouseHold===\n");
-            printf("3. Sprei/Selimut/Sarung Bantal & Guling\n");
-            printf("4. Bed Cover Kecil\n");
-            printf("5. Bed Cover Sedang\n");
-            printf("6. Bed Cover Besar\n");
-
-            int jenis;
-            printf("Masukkan nomor jenis laundry: ");
-            scanf("%d", &jenis);
-
-            switch (jenis) {
-                case 1:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Cuci Kiloan Reguler");
-                    break;
-                case 2:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Cuci Kiloan Express");
-                    break;
-                case 3:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Sprei/Selimut/Sarung Bantal & Guling");
-                    break;
-                case 4:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Kecil");
-                    break;
-                case 5:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Sedang");
-                    break;
-                case 6:
-                    strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Besar");
-                    break;
-                default:
-                    printf("Nomor jenis laundry tidak valid.\n");
-                    return;
-            }
-
-            printf("Durasi laundry (dalam hari): ");
-            scanf("%d", &dataLaundry[*jumlahLaundry].durasi);
-            printf("Berat laundry (dalam kilogram): ");
-            scanf("%lf", &dataLaundry[*jumlahLaundry].berat);
-
-            dataLaundry[*jumlahLaundry].harga = hitungHargaLaundry(dataLaundry[*jumlahLaundry].jenis, dataLaundry[*jumlahLaundry].berat);
-            dataLaundry[*jumlahLaundry].status = BELUM_DIKONFIRMASI;
-
-            dataPelanggan[pelangganIndexLogin].saldo -= dataLaundry[*jumlahLaundry].harga;
-            printf("Laundry berhasil disetor. Harga laundry: %.2lf\n", dataLaundry[*jumlahLaundry].harga);
-            (*jumlahLaundry)++;
-        } else {
-            printf("Kapasitas laundry penuh. Tidak dapat menyetor laundry lebih banyak.\n");
-        }
-    } else {
+    if (dataPelanggan[pelangganIndexLogin].saldo <= 0) {
         printf("Saldo tidak mencukupi untuk melakukan laundry.\n");
+        return;
     }
-}
 
-double hitungHargaLaundry(const char *jenisLaundry, double berat) {
+    // Memastikan *jumlahLaundry tidak melebihi MAX_LAUNDRY
+    if (*jumlahLaundry >= MAX_LAUNDRY) {
+        printf("Kapasitas laundry penuh. Tidak dapat menyetor laundry lebih banyak.\n");
+        return;
+    }
+
+    printf("Pilih jenis laundry:\n");
+    printf("===Cuci Kiloan===\n");
+    printf("1. Cuci Kiloan Reguler\n");
+    printf("2. Cuci Kiloan Express\n");
+    printf("===HouseHold===\n");
+    printf("3. Sprei/Selimut/Sarung Bantal & Guling\n");
+    printf("4. Bed Cover Kecil\n");
+    printf("5. Bed Cover Sedang\n");
+    printf("6. Bed Cover Besar\n");
+
+    int jenis;
+    printf("Masukkan nomor jenis laundry: ");
+    scanf("%d", &jenis);
+
     double hargaPerKilogram;
 
     // Menggunakan switch case untuk menentukan hargaPerKilogram berdasarkan jenisLaundry
-    switch (jenisLaundry[0]) {
-        case '1':
-            hargaPerKilogram = 6.0;
+    switch (jenis) {
+        case 1:
+            hargaPerKilogram = 6000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Cuci Kiloan Reguler");
             break;
-        case '2':
-            hargaPerKilogram = 8.0;
+        case 2:
+            hargaPerKilogram = 8000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Cuci Kiloan Express");
             break;
-        case '3':
-            hargaPerKilogram = 15.0;
+        case 3:
+            hargaPerKilogram = 15000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Sprei/Selimut/Sarung Bantal & Guling");
             break;
-        case '4':
-            hargaPerKilogram = 10.0;
+        case 4:
+            hargaPerKilogram = 10000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Kecil");
             break;
-        case '5':
-            hargaPerKilogram = 13.0;
+        case 5:
+            hargaPerKilogram = 13000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Sedang");
             break;
-        case '6':
-            hargaPerKilogram = 16.0;
+        case 6:
+            hargaPerKilogram = 16000.0;
+            strcpy(dataLaundry[*jumlahLaundry].jenis, "Bed Cover Besar");
             break;
         default:
-            // Jenis laundry tidak dikenal, beri harga default
-            hargaPerKilogram = 10.0;
-            break;
+            printf("Nomor jenis laundry tidak valid.\n");
+            return;
     }
 
-    // Hitung harga total
-    double hargaTotal = berat * hargaPerKilogram;
+    printf("Durasi laundry (dalam hari): ");
+    scanf("%d", &dataLaundry[*jumlahLaundry].durasi);
+    printf("Berat laundry (dalam kilogram): ");
+    scanf("%lf", &dataLaundry[*jumlahLaundry].berat);
 
-    return hargaTotal;
+    // Hitung harga total
+    dataLaundry[*jumlahLaundry].harga = dataLaundry[*jumlahLaundry].berat * hargaPerKilogram;
+
+    dataLaundry[*jumlahLaundry].status = BELUM_DIKONFIRMASI;
+
+    dataPelanggan[pelangganIndexLogin].saldo -= dataLaundry[*jumlahLaundry].harga;
+    printf("Laundry berhasil disetor. Harga laundry: %.2lf\n", dataLaundry[*jumlahLaundry].harga);
+    (*jumlahLaundry)++;
 }
 
 
@@ -474,9 +488,9 @@ void lihatStatusLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int juml
             printf("Berat: %.2lf kg\n", dataLaundry[i].berat);
             printf("Harga: %.2lf\n", dataLaundry[i].harga);
 
-            if (dataLaundry[i].status == 0) {
+            if (dataLaundry[i].status == BELUM_DIKONFIRMASI) {
                 printf("Status: Belum dikonfirmasi\n");
-            } else if (dataLaundry[i].status == 1) {
+            } else if (dataLaundry[i].status == SEDANG_DIKERJAKAN) {
                 printf("Status: Sedang dikerjakan\n");
             } else {
                 printf("Status: Selesai\n");
@@ -506,22 +520,22 @@ void cekHarga() {
 
     switch (jenis) {
         case 1:
-            printf("Harga Cuci Kiloan Reguler: Rp. 6.0 per kilogram\n");
+            printf("Harga Cuci Kiloan Reguler: Rp. 6000.0 per kilogram\n");
             break;
         case 2:
-            printf("Harga Cuci Kiloan Express: Rp. 8.0 per kilogram\n");
+            printf("Harga Cuci Kiloan Express: Rp. 8000.0 per kilogram\n");
             break;
         case 3:
-            printf("Harga Sprei/Selimut/Sarung Bantal & Guling: Rp. 15.0 per kilogram\n");
+            printf("Harga Sprei/Selimut/Sarung Bantal & Guling: Rp. 15000.0 per kilogram\n");
             break;
         case 4:
-            printf("Harga Bed Cover Kecil: Rp. 10.0 per kilogram\n");
+            printf("Harga Bed Cover Kecil: Rp. 10000.0 per kilogram\n");
             break;
         case 5:
-            printf("Harga Bed Cover Sedang: Rp. 13.0 per kilogram\n");
+            printf("Harga Bed Cover Sedang: Rp. 13000.0 per kilogram\n");
             break;
         case 6:
-            printf("Harga Bed Cover Besar: Rp. 16.0 per kilogram\n");
+            printf("Harga Bed Cover Besar: Rp. 16000.0 per kilogram\n");
             break;
         default:
             printf("Nomor jenis laundry tidak valid.\n");
@@ -574,7 +588,7 @@ void lihatPendapatan(Laundry *dataLaundry, int jumlahLaundry) {
     printf("Total Pendapatan: Rp. %.2f\n", totalPendapatan);
 }
 
-void perbaruiStatusLaundry(Laundry *dataLaundry, int jumlahLaundry) {
+void perbaruiStatusLaundry(Laundry *dataLaundry, Pelanggan *dataPelanggan, int jumlahLaundry) {
     char username[50];
 
     printf("Masukkan username pelanggan: ");
@@ -582,7 +596,8 @@ void perbaruiStatusLaundry(Laundry *dataLaundry, int jumlahLaundry) {
 
     int found = 0;
     for (int i = 0; i < jumlahLaundry; i++) {
-        if (strcmp(dataLaundry[i].jenis, username) == 0) {
+        // Membandingkan username dengan dataPelanggan, bukan dataLaundry
+        if (strcmp(dataPelanggan[i].username, username) == 0) {
             // Menampilkan informasi laundry sebelum diperbarui
             printf("Informasi Laundry Sebelum Diperbarui:\n");
             printf("Jenis: %s, Durasi: %d hari, Berat: %.2f kg, Harga: Rp. %.2f, Status: %d\n",
@@ -611,11 +626,22 @@ void perbaruiStatusLaundry(Laundry *dataLaundry, int jumlahLaundry) {
     }
 }
 
+
 void lihatHistoriPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     char username[50];
 
     printf("Masukkan username pelanggan: ");
     scanf("%s", username);
+
+    int frekuensi = 0;
+
+    // Mencari frekuensi pelanggan berdasarkan username
+    for (int i = 0; i < jumlahPelanggan; i++) {
+        if (strcmp(dataPelanggan[i].username, username) == 0) {
+            frekuensi = dataPelanggan[i].frekuensi;
+            break;
+        }
+    }
 
     // Menampilkan histori laundry pelanggan berdasarkan username
     printf("Histori Laundry Pelanggan %s:\n", username);
