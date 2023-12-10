@@ -41,7 +41,7 @@ void isiSaldo(Pelanggan *dataPelanggan, int jumlahPelanggan);
 void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int *jumlahLaundry);
 double hitungHargaLaundry(const char *jenisLaundry, double berat);
 void lihatStatusLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry);
-int cekHarga();
+void cekHarga();
 void hapusPelanggan(Pelanggan *dataPelanggan, int *jumlahPelanggan);
 void lihatPendapatan(Laundry *dataLaundry, int jumlahLaundry);
 void perbaruiStatusLaundry(Laundry *dataLaundry, int jumlahLaundry);
@@ -506,7 +506,7 @@ void lihatStatusLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int juml
 }
 
 
-int cekHarga() {
+void cekHarga() {
     printf("=== Cek Harga Laundry ===\n");
     printf("Pilih jenis laundry:\n");
     printf("===Cuci Kiloan===\n");
