@@ -32,7 +32,6 @@ typedef struct {
 // Variabel global
 int pelangganIndexLogin = -1; // Variabel global untuk menyimpan indeks pelanggan yang sedang login
 
-
 // Urutan deklarasi fungsi dengan fungsi-fungsinya
 void bersihkanLayar();
 
@@ -120,7 +119,7 @@ int main() {
 }
 
 
-//==============Memulai fungsi-fungsi yang ada=================
+//=================Memulai fungsi-fungsi yang ada=================
 
 void bersihkanLayar() {
 #ifdef _WIN32
@@ -349,7 +348,7 @@ int cekLoginPelanggan(Pelanggan *dataPelanggan, int jumlahPelanggan, const char 
     return 0; // False, login gagal
 }
 
-// Modifikasi fungsi isiSaldo
+
 void isiSaldo(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int *jumlahLaundry) {
     if (pelangganIndexLogin != -1) {
         int pilihan;
@@ -359,14 +358,13 @@ void isiSaldo(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelangga
         printf("Masukkan pilihan: ");
         scanf("%d", &pilihan);
 
-        // Variabel jumlahSaldoDitambahkan hanya dideklarasi ketika dibutuhkan
         switch (pilihan) {
             case 1: {
                 double jumlahSaldoDitambahkan;
                 printf("Masukkan jumlah saldo yang ingin diisi: ");
                 scanf("%lf", &jumlahSaldoDitambahkan);
 
-                // Tambahkan saldo pelanggan
+                // Tambah saldo
                 dataPelanggan[pelangganIndexLogin].saldo += jumlahSaldoDitambahkan;
 
                 printf("Saldo berhasil diisi. Saldo sekarang: %.2lf\n", dataPelanggan[pelangganIndexLogin].saldo);
@@ -400,7 +398,6 @@ void isiSaldo(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelangga
 }
 
 
-// Modifikasi fungsi setorLaundry
 void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int *jumlahLaundry) {
     if (pelangganIndexLogin == -1) {
         printf("Anda belum login sebagai pelanggan. Silakan login terlebih dahulu.\n");
@@ -483,7 +480,7 @@ void setorLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPela
     (*jumlahLaundry)++;
 }
 
-// Modifikasi fungsi lihatStatusLaundry
+
 void lihatStatusLaundry(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     if (pelangganIndexLogin == -1) {
         printf("Anda belum login sebagai pelanggan. Silakan login terlebih dahulu.\n");
@@ -637,11 +634,10 @@ void perbaruiStatusLaundry(Laundry *dataLaundry, Pelanggan *dataPelanggan, int j
 }
 
 
-
 void lihatHistoriPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     printf("Histori Laundry Pelanggan yang Sudah Selesai:\n");
 
-    // Urutkan dataLaundry berdasarkan frekuensi selesai secara menurun
+    // Urutkan dataLaundry berdasarkan frekuensi (semakin banyak, semakin diatas)
     for (int i = 0; i < jumlahLaundry - 1; i++) {
         for (int j = 0; j < jumlahLaundry - i - 1; j++) {
             if (dataLaundry[j].status == SELESAI && dataLaundry[j].frekuensi < dataLaundry[j + 1].frekuensi) {
@@ -677,7 +673,7 @@ void tampilkanMenuAdmin() {
 
 void tampilkanMenuPelanggan() {
     printf("Menu Pelanggan:\n");
-    printf("1. Isi Saldo\n"); // UDAH
+    printf("1. Isi Saldo atau Cek Saldo\n"); // UDAH
     printf("2. Setor Laundry\n"); // UDAH
     printf("3. Lihat Status Laundry\n"); // UDAH
     printf("4. Cek Harga\n"); // UDAH
