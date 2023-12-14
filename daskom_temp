@@ -30,6 +30,11 @@ typedef struct {
     int jumlahItem;
 } Laundry;
 
+typedef struct {
+    char username[50];
+    int banyakSetoran;
+} InfoPelanggan; // Untuk void lihatHistoriPelanggan
+
 // Variabel global
 int pelangganIndexLogin = -1; // Variabel global untuk menyimpan indeks pelanggan yang sedang login
 
@@ -185,7 +190,7 @@ void loginAdmin(Pelanggan *dataPelanggan, Laundry *dataLaundry, int *jumlahPelan
     int loginSuccess = 0;
     int attempt = 0;
     const char adminUsername[] = "admin";
-    const char adminPassword[] = "admin123";
+    const char adminPassword[] = "passwordadmin";
 
     do {
         printf("Masukkan username: ");
@@ -676,35 +681,59 @@ void perbaruiStatusLaundry(Laundry *dataLaundry, Pelanggan *dataPelanggan, int j
 void lihatHistoriPelanggan(Pelanggan *dataPelanggan, Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     printf("Histori Laundry Pelanggan yang Sudah Selesai:\n");
 
-    // Urutkan dataLaundry berdasarkan frekuensi
-    for (int i = 0; i < jumlahLaundry - 1; i++) {
-        for (int j = 0; j < jumlahLaundry - i - 1; j++) {
-            if (dataLaundry[j].status == SELESAI && dataLaundry[j].frekuensi < dataLaundry[j + 1].frekuensi) {
-                Laundry tempLaundry = dataLaundry[j];
-                dataLaundry[j] = dataLaundry[j + 1];
-                dataLaundry[j + 1] = tempLaundry;
-            }
-        }
+    // Hitung banyaknya setoran laundry untuk setiap pelanggan
+    InfoPelanggan infoPelanggan[jumlahPelanggan];
+    for (int i = 0; i < jumlahPelanggan; i++) {
+        infoPelanggan[i].banyakSetoran = 0;
+        strcpy(infoPelanggan[i].username, dataPelanggan[i].username);
     }
 
     for (int i = 0; i < jumlahLaundry; i++) {
         if (dataLaundry[i].status == SELESAI) {
-            printf("Pelanggan: %s\n", dataLaundry[i].username);
-            printf("Status: Selesai\n");
-
-            if (strcmp(dataLaundry[i].jenis, "Cuci Kiloan Reguler") == 0 || strcmp(dataLaundry[i].jenis, "Cuci Kiloan Express") == 0) {
-                // Jenis CUCI KILOAN
-                printf("Jenis: %s, Durasi: %d hari, Berat: %.2f kg, Harga: Rp. %.2f\n",
-                       dataLaundry[i].jenis, dataLaundry[i].durasi, dataLaundry[i].berat,
-                       dataLaundry[i].harga);
-            } else {
-                // Jenis HOUSEHOLD
-                printf("Jenis: %s, Jumlah Item: %d, Harga: Rp. %.2f\n",
-                       dataLaundry[i].jenis, dataLaundry[i].jumlahItem,
-                       dataLaundry[i].harga);
+            for (int j = 0; j < jumlahPelanggan; j++) {
+                if (strcmp(dataLaundry[i].username, infoPelanggan[j].username) == 0) {
+                    infoPelanggan[j].banyakSetoran++;
+                    break;
+                }
             }
+        }
+    }
 
-            printf("\n");
+    // Urutkan dataPelanggan berdasarkan banyaknya setoran laundry
+    for (int i = 0; i < jumlahPelanggan - 1; i++) {
+        for (int j = 0; j < jumlahPelanggan - i - 1; j++) {
+            if (infoPelanggan[j].banyakSetoran < infoPelanggan[j + 1].banyakSetoran) {
+                InfoPelanggan tempInfo = infoPelanggan[j];
+                infoPelanggan[j] = infoPelanggan[j + 1];
+                infoPelanggan[j + 1] = tempInfo;
+            }
+        }
+    }
+
+    // Tampilkan hasil
+    for (int i = 0; i < jumlahPelanggan; i++) {
+        printf("Pelanggan: %s\n", infoPelanggan[i].username);
+        printf("Banyaknya setoran laundry: %d\n", infoPelanggan[i].banyakSetoran);
+
+        // Tampilkan detail laundry
+        for (int j = 0; j < jumlahLaundry; j++) {
+            if (strcmp(dataLaundry[j].username, infoPelanggan[i].username) == 0 && dataLaundry[j].status == SELESAI) {
+                printf("Status: Selesai\n");
+
+                if (strcmp(dataLaundry[j].jenis, "Cuci Kiloan Reguler") == 0 || strcmp(dataLaundry[j].jenis, "Cuci Kiloan Express") == 0) {
+                    // Jenis CUCI KILOAN
+                    printf("Jenis: %s, Durasi: %d hari, Berat: %.2f kg, Harga: Rp. %.2f\n",
+                           dataLaundry[j].jenis, dataLaundry[j].durasi, dataLaundry[j].berat,
+                           dataLaundry[j].harga);
+                } else {
+                    // Jenis HOUSEHOLD
+                    printf("Jenis: %s, Jumlah Item: %d, Harga: Rp. %.2f\n",
+                           dataLaundry[j].jenis, dataLaundry[j].jumlahItem,
+                           dataLaundry[j].harga);
+                }
+
+                printf("\n");
+            }
         }
     }
 }
