@@ -50,6 +50,8 @@ int jumlahBarangDaftar = 0; // Jumlah barang saat ini di daftarBarang
 void daftarUser();
 int loginAdmin();
 int loginUser();
+
+// fungsi admin
 void pengelolaanPengguna();
 void tampilkanLaporan(Transaksi *transaksi, int jumlahTransaksi);
 void laporanImpor();
@@ -58,6 +60,8 @@ void updateBarang(Barang *barang, int *jumlahBarang);
 void pengaturanMataUang();
 void pengaturanSistem(Barang *barang, int *jumlahBarang);
 void menuAdmin();
+
+// fungsi user
 void prosesImpor(Barang *barang, int jumlahBarang);
 void prosesEkspor(Barang *barang, int jumlahBarang);
 void menuUser();
