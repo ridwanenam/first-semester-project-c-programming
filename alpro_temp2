@@ -1,0 +1,609 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Struktur data untuk menyimpan informasi user
+typedef struct {
+    char username[50];
+    char password[50];
+} User;
+
+// Struktur data untuk menyimpan informasi admin
+typedef struct {
+    char username[50];
+    char password[50];
+} Admin;
+
+// Struktur data untuk menyimpan informasi barang
+typedef struct {
+    char nama[50];
+    float harga;
+    int stok;
+} Barang;
+
+// Struktur data untuk menyimpan informasi transaksi
+typedef struct {
+    char username[50];
+    char barang[50];
+    int jumlahBarang;
+    float hargaTotal;
+} Transaksi;
+
+// Struktur data untuk menyimpan informasi mata uang
+typedef struct {
+    char kode[4];
+    float kurs;
+} MataUang;
+
+// Variabel global untuk menyimpan indeks pelanggan yang sedang login
+int pelangganIndexLogin = -1;
+
+// Deklarasi global
+Barang barang[50];  // Misalnya, array barang memiliki panjang 50
+int jumlahBarang = 0;  // Misalnya, jumlah barang awal adalah 0
+Transaksi transaksi[50]; // Misalnya, array transaksi memiliki panjang 50
+int jumlahTransaksi = 0; // Misalnya, jumlah transaksi awal adalah 0
+Barang daftarBarang[100]; // Misalnya, maksimal ada 100 barang
+int jumlahBarangDaftar = 0; // Jumlah barang saat ini di daftarBarang
+
+// Deklarasi fungsi
+void daftarUser();
+int loginAdmin();
+int loginUser();
+void pengelolaanPengguna();
+void tampilkanLaporan(Transaksi *transaksi, int jumlahTransaksi);
+void laporanImpor();
+void laporanEkspor();
+void updateBarang(Barang *barang, int *jumlahBarang);
+void pengaturanMataUang();
+void pengaturanSistem(Barang *barang, int *jumlahBarang);
+void menuAdmin();
+void prosesImpor(Barang *barang, int jumlahBarang);
+void prosesEkspor(Barang *barang, int jumlahBarang);
+void menuUser();
+
+// Fungsi utama (main)
+int main() {
+    int pilihan;
+
+    do {
+        // Menampilkan menu utama
+        printf("\n=== Selamat Datang di Sistem Ekspor-Impor ===\n");
+        printf("1. Login sebagai Admin\n");
+        printf("2. Login sebagai User\n");
+        printf("3. Daftar User\n");
+        printf("4. Keluar\n");
+        printf("Pilih menu (1-4): ");
+        scanf("%d", &pilihan);
+
+        // Menggunakan switch case untuk memilih menu
+        switch (pilihan) {
+            case 1:
+                // Login sebagai Admin
+                if (loginAdmin()) {
+                    // Lanjutkan ke menu Admin jika login berhasil
+                    menuAdmin();
+                } else {
+                    printf("Login sebagai Admin Gagal\n");
+                }
+                break;
+            case 2:
+                // Login sebagai User
+                if (loginUser()) {
+                    // Lanjutkan ke menu User jika login berhasil
+                    // menuUser();
+                    if (pelangganIndexLogin != -1) {
+                        menuUser();
+                    }
+                } else {
+                    printf("Login sebagai User Gagal\n");
+                }
+                break;
+            case 3:
+                // Daftar User
+                daftarUser();
+                break;
+            case 4:
+                printf("Keluar dari program.\n");
+                break;
+            default:
+                printf("Pilihan tidak valid.\n");
+                break;
+        }
+    } while (pilihan != 4);
+
+    return 0;
+}
+
+//=== fungsi-fungsi ===
+
+// Fungsi untuk daftar user
+void daftarUser() {
+    FILE *file;
+    User newUser;
+
+    // Membuka file untuk penulisan (mode "ab" untuk append binary)
+    file = fopen("user_data.dat", "ab");
+    if (file == NULL) {
+        printf("Error: Gagal membuka file untuk penulisan.\n");
+        exit(1);
+    }
+
+    // Meminta pengguna memasukkan informasi pengguna baru
+    printf("Masukkan username: ");
+    scanf("%s", newUser.username);
+
+    printf("Masukkan password: ");
+    scanf("%s", newUser.password);
+
+    // Menyimpan informasi pengguna ke dalam file
+    fwrite(&newUser, sizeof(User), 1, file);
+
+    // Menutup file
+    fclose(file);
+
+    printf("Pengguna baru berhasil didaftarkan.\n");
+}
+
+
+// Fungsi untuk login sebagai Admin
+int loginAdmin() {
+    char username[20];
+    char password[20];
+
+    // Meminta pengguna memasukkan username
+    printf("Masukkan username Admin: ");
+    scanf("%s", username);
+
+    // Meminta pengguna memasukkan password
+    printf("Masukkan password Admin: ");
+    scanf("%s", password);
+
+    // Memeriksa kevalidan username dan password
+    if (strcmp(username, "admin") == 0 && strcmp(password, "passwordadmin") == 0) {
+        printf("Login sebagai Admin berhasil.\n");
+        return 1; // Return 1 jika login berhasil
+    } else {
+        printf("Login sebagai Admin gagal.\n");
+        return 0; // Return 0 jika login gagal
+    }
+}
+
+// Fungsi untuk login sebagai User
+int loginUser() {
+    FILE *file;
+    User userLogin;
+    char userUsername[50];
+    char userPassword[50];
+
+    // Membuka file yang berisi informasi user
+    file = fopen("user_data.dat", "rb");
+    if (file == NULL) {
+        printf("Error: File user_data.dat tidak ditemukan.\n");
+        exit(1);
+    }
+
+    // Meminta pengguna memasukkan username dan password User
+    printf("Masukkan username User: ");
+    scanf("%s", userUsername);
+
+    printf("Masukkan password User: ");
+    scanf("%s", userPassword);
+
+    // Memeriksa kevalidan username dan password
+    int valid = 0; // Flag untuk menandakan kevalidan login
+    while (fread(&userLogin, sizeof(User), 1, file) == 1) {
+        if (strcmp(userUsername, userLogin.username) == 0 && strcmp(userPassword, userLogin.password) == 0) {
+            valid = 1;
+            break;
+        }
+    }
+
+    // Menutup file
+    fclose(file);
+
+    // Jika login valid, lanjutkan ke menu User
+    if (valid) {
+        printf("Login User berhasil.\n");
+    } else {
+        printf("Login User gagal. Keluar dari program.\n");
+        exit(1);
+    }
+}
+
+// Fungsi untuk menampilkan daftar pengguna
+void pengelolaanPengguna() {
+    FILE *file;
+    char username[50];
+    char password[50];
+
+    // Membuka file yang berisi informasi pengguna
+    file = fopen("user_data.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
+    if (file == NULL) {
+        printf("Error: File user_data.dat tidak ditemukan.\n");
+        return;
+    }
+
+    // Menampilkan daftar pengguna
+    printf("\n=== Daftar Pengguna ===\n");
+    printf("Username\tPassword\n");
+
+    // Membaca data pengguna dari file biner
+    while (fread(&username, sizeof(char[50]), 1, file) == 1) {
+        fread(&password, sizeof(char[50]), 1, file);
+        printf("%-15s %s\n", username, password);
+    }
+
+    // Menutup file
+    fclose(file);
+}
+
+// Fungsi untuk menampilkan laporan transaksi
+void tampilkanLaporan(Transaksi *transaksi, int jumlahTransaksi) {
+    printf("\n=== Laporan Transaksi ===\n");
+    printf("Username\tBarang\t\tJumlah\tHarga Total\n");
+    for (int i = 0; i < jumlahTransaksi; i++) {
+        printf("%-15s %-15s %-6d %.2f\n", transaksi[i].username, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+    }
+}
+
+// Fungsi untuk menampilkan laporan impor
+void laporanImpor() {
+    FILE *file;
+    Transaksi transaksi;
+    int jumlahTransaksi = 0; // Jumlah transaksi impor
+
+    // Membuka file yang berisi informasi transaksi impor
+    file = fopen("laporan_impor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
+    if (file == NULL) {
+        printf("Error: File laporan_impor.dat tidak ditemukan.\n");
+        return;
+    }
+
+    // Membaca informasi transaksi impor
+    while (fread(&transaksi, sizeof(Transaksi), 1, file) == 1) {
+        jumlahTransaksi++;
+    }
+
+    // Menutup file
+    fclose(file);
+
+    // Menampilkan laporan impor
+    if (jumlahTransaksi > 0) {
+        tampilkanLaporan(&transaksi, jumlahTransaksi);
+    } else {
+        printf("Tidak ada laporan impor.\n");
+    }
+}
+
+// Fungsi untuk menampilkan laporan ekspor
+void laporanEkspor() {
+    FILE *file;
+    Transaksi transaksi;
+    int jumlahTransaksi = 0; // Jumlah transaksi ekspor
+
+    // Membuka file yang berisi informasi transaksi ekspor
+    file = fopen("laporan_ekspor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
+    if (file == NULL) {
+        printf("Error: File laporan_ekspor.dat tidak ditemukan.\n");
+        return;
+    }
+
+    // Membaca informasi transaksi ekspor
+    while (fread(&transaksi, sizeof(Transaksi), 1, file) == 1) {
+        jumlahTransaksi++;
+    }
+
+    // Menutup file
+    fclose(file);
+
+    // Menampilkan laporan ekspor
+    if (jumlahTransaksi > 0) {
+        tampilkanLaporan(&transaksi, jumlahTransaksi);
+    } else {
+        printf("Tidak ada laporan ekspor.\n");
+    }
+}
+
+
+// Fungsi untuk update barang
+void updateBarang(Barang *barang, int *jumlahBarang) {
+    FILE *file;
+    Barang newBarang;
+
+    // Membuka file yang berisi informasi barang
+    file = fopen("data_barang.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    if (file == NULL) {
+        printf("Error: File data_barang.dat tidak dapat diakses.\n");
+        return;
+    }
+
+    // Meminta pengguna memasukkan informasi barang baru
+    printf("Masukkan nama barang: ");
+    scanf("%s", newBarang.nama);
+
+    printf("Masukkan harga barang: ");
+    scanf("%f", &newBarang.harga);
+
+    printf("Masukkan stok barang: ");
+    scanf("%d", &newBarang.stok);
+
+    // Menyimpan informasi barang ke dalam file
+    fwrite(&newBarang, sizeof(Barang), 1, file);
+
+    // Menambah jumlah barang
+    (*jumlahBarang)++;
+
+    // Menutup file
+    fclose(file);
+
+    printf("Barang berhasil ditambahkan.\n");
+}
+
+
+// Fungsi untuk pengaturan mata uang
+void pengaturanMataUang() {
+    FILE *file;
+    MataUang mataUang;
+
+    // Membuka file yang berisi informasi mata uang
+    file = fopen("data_mata_uang.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    if (file == NULL) {
+        printf("Error: File data_mata_uang.dat tidak dapat diakses.\n");
+        return;
+    }
+
+    // Meminta pengguna memasukkan informasi mata uang baru
+    printf("Masukkan kode mata uang (3 huruf): ");
+    scanf("%s", mataUang.kode);
+
+    printf("Masukkan kurs mata uang: ");
+    scanf("%f", &mataUang.kurs);
+
+    // Menyimpan informasi mata uang ke dalam file
+    fwrite(&mataUang, sizeof(MataUang), 1, file);
+
+    // Menutup file
+    fclose(file);
+
+    printf("Mata uang berhasil ditambahkan.\n");
+}
+
+// Fungsi untuk pengaturan sistem
+void pengaturanSistem(Barang *barang, int *jumlahBarang) {
+    int pilihan;
+
+    do {
+        printf("\n=== Menu Pengaturan Sistem ===\n");
+        printf("1. Update Barang\n");
+        printf("2. Pengaturan Mata Uang\n");
+        printf("3. Kembali ke Menu Admin\n");
+        printf("Pilih menu (1-3): ");
+        scanf("%d", &pilihan);
+
+        switch (pilihan) {
+            case 1:
+                updateBarang(barang, jumlahBarang);
+                break;
+            case 2:
+                pengaturanMataUang();
+                break;
+            case 3:
+                printf("Kembali ke Menu Admin.\n");
+                break;
+            default:
+                printf("Pilihan tidak valid.\n");
+                break;
+        }
+    } while (pilihan != 3);
+}
+
+// Fungsi untuk menu Admin
+void menuAdmin() {
+    int pilihan;
+
+    do {
+        printf("\n=== Menu Admin ===\n");
+        printf("1. Lihat Daftar Pengguna\n");
+        printf("2. Laporan Transaksi\n");
+        printf("3. Pengaturan Sistem\n");
+        printf("4. Keluar\n");
+        printf("Pilih menu (1-4): ");
+        scanf("%d", &pilihan);
+
+        switch (pilihan) {
+            case 1:
+                pengelolaanPengguna();
+                break;
+            case 2:
+                printf("\n=== Laporan Transaksi ===\n");
+                printf("1. Laporan Impor\n");
+                printf("2. Laporan Ekspor\n");
+                printf("Pilih laporan (1-2): ");
+                scanf("%d", &pilihan);
+                if (pilihan == 1) {
+                    laporanImpor();
+                } else if (pilihan == 2) {
+                    laporanEkspor();
+                } else {
+                    printf("Pilihan tidak valid.\n");
+                }
+                break;
+            case 3:
+                pengaturanSistem(daftarBarang, &jumlahBarang);;
+                break;
+            case 4:
+                printf("Keluar dari Menu Admin.\n");
+                break;
+            default:
+                printf("Pilihan tidak valid.\n");
+                break;
+        }
+    } while (pilihan != 4);
+}
+
+// Fungsi untuk proses impor barang
+void prosesImpor(Barang *barang, int jumlahBarang) {
+    FILE *file;
+    Transaksi transaksi;
+    int indeksBarang, jumlahBarangImpor;
+    float hargaTotal, kurs;
+
+    // Membuka file yang berisi informasi transaksi impor
+    file = fopen("laporan_impor.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    if (file == NULL) {
+        printf("Error: File laporan_impor.dat tidak dapat diakses.\n");
+        return;
+    }
+
+    // Meminta pengguna memasukkan informasi transaksi impor
+    printf("Masukkan nama barang yang akan diimpor: ");
+    scanf("%s", transaksi.barang);
+
+    // Mencari indeks barang dalam array
+    indeksBarang = -1;
+    for (int i = 0; i < jumlahBarang; i++) {
+        if (strcmp(barang[i].nama, transaksi.barang) == 0) {
+            indeksBarang = i;
+            break;
+        }
+    }
+
+    // Memastikan barang ditemukan dalam daftar barang
+    if (indeksBarang == -1) {
+        printf("Error: Barang tidak ditemukan.\n");
+        fclose(file);
+        return;
+    }
+
+    // Meminta pengguna memasukkan jumlah barang yang diimpor
+    printf("Masukkan jumlah barang yang diimpor: ");
+    scanf("%d", &jumlahBarangImpor);
+
+    // Memeriksa stok barang cukup untuk diimpor
+    if (jumlahBarangImpor > barang[indeksBarang].stok) {
+        printf("Error: Stok barang tidak cukup untuk diimpor.\n");
+        fclose(file);
+        return;
+    }
+
+    // Memeriksa kurs mata uang
+    printf("Masukkan kurs mata uang (1 USD ke mata uang tujuan): ");
+    scanf("%f", &kurs);
+
+    // Menghitung harga total dengan memperhitungkan kurs mata uang
+    hargaTotal = jumlahBarangImpor * barang[indeksBarang].harga * kurs;
+
+    // Memasukkan informasi transaksi impor ke dalam file
+    strcpy(transaksi.username, "admin"); // Admin yang melakukan impor
+    transaksi.jumlahBarang = jumlahBarangImpor;
+    transaksi.hargaTotal = hargaTotal;
+
+    fwrite(&transaksi, sizeof(Transaksi), 1, file);
+
+    // Mengurangi stok barang
+    barang[indeksBarang].stok -= jumlahBarangImpor;
+
+    // Menutup file
+    fclose(file);
+
+    printf("Impor barang berhasil.\n");
+}
+
+// Fungsi untuk proses ekspor barang
+void prosesEkspor(Barang *barang, int jumlahBarang) {
+    FILE *file;
+    Transaksi transaksi;
+    int indeksBarang, jumlahBarangEkspor;
+    float hargaTotal, kurs;
+
+    // Membuka file yang berisi informasi transaksi ekspor
+    file = fopen("laporan_ekspor.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    if (file == NULL) {
+        printf("Error: File laporan_ekspor.dat tidak dapat diakses.\n");
+        return;
+    }
+
+    // Meminta pengguna memasukkan informasi transaksi ekspor
+    printf("Masukkan nama barang yang akan diekspor: ");
+    scanf("%s", transaksi.barang);
+
+    // Mencari indeks barang dalam array
+    indeksBarang = -1;
+    for (int i = 0; i < jumlahBarang; i++) {
+        if (strcmp(barang[i].nama, transaksi.barang) == 0) {
+            indeksBarang = i;
+            break;
+        }
+    }
+
+    // Memastikan barang ditemukan dalam daftar barang
+    if (indeksBarang == -1) {
+        printf("Error: Barang tidak ditemukan.\n");
+        fclose(file);
+        return;
+    }
+
+    // Meminta pengguna memasukkan jumlah barang yang diekspor
+    printf("Masukkan jumlah barang yang diekspor: ");
+    scanf("%d", &jumlahBarangEkspor);
+
+    // Memeriksa stok barang cukup untuk diekspor
+    if (jumlahBarangEkspor > barang[indeksBarang].stok) {
+        printf("Error: Stok barang tidak cukup untuk diekspor.\n");
+        fclose(file);
+        return;
+    }
+
+    // Memeriksa kurs mata uang
+    printf("Masukkan kurs mata uang (1 USD ke mata uang tujuan): ");
+    scanf("%f", &kurs);
+
+    // Menghitung harga total dengan memperhitungkan kurs mata uang
+    hargaTotal = jumlahBarangEkspor * barang[indeksBarang].harga * kurs;
+
+    // Memasukkan informasi transaksi ekspor ke dalam file
+    strcpy(transaksi.username, "user"); // User yang melakukan ekspor
+    transaksi.jumlahBarang = jumlahBarangEkspor;
+    transaksi.hargaTotal = hargaTotal;
+
+    fwrite(&transaksi, sizeof(Transaksi), 1, file);
+
+    // Mengurangi stok barang
+    barang[indeksBarang].stok -= jumlahBarangEkspor;
+
+    // Menutup file
+    fclose(file);
+
+    printf("Ekspor barang berhasil.\n");
+}
+
+
+// Fungsi untuk menu User
+void menuUser() {
+    int pilihan;
+
+    do {
+        printf("\n=== Menu User ===\n");
+        printf("1. Sub Menu Impor\n");
+        printf("2. Sub Menu Ekspor\n");
+        printf("3. Keluar\n");
+        printf("Pilih menu (1-3): ");
+        scanf("%d", &pilihan);
+
+        switch (pilihan) {
+            case 1:
+                prosesImpor(barang, jumlahBarang);
+                break;
+            case 2:
+                prosesEkspor(barang, *&jumlahBarang);
+                break;
+            case 3:
+                printf("Keluar dari Menu User.\n");
+                break;
+            default:
+                printf("Pilihan tidak valid.\n");
+                break;
+        }
+    } while (pilihan != 3);
+}
