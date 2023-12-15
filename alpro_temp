@@ -36,11 +36,18 @@ typedef struct {
     float kurs;
 } MataUang;
 
+// Variabel global untuk menyimpan indeks pelanggan yang sedang login
+int pelangganIndexLogin = -1;
+
+
 // Deklarasi fungsi
+
 void daftarUser();
 int loginAdmin();
 int loginUser();
-void lihatDaftarPengguna();
+
+// menu admin
+void pengelolaanPengguna();
 void tampilkanLaporan(Transaksi *transaksi, int jumlahTransaksi);
 void laporanImpor();
 void laporanEkspor();
@@ -48,13 +55,16 @@ void updateBarang();
 void pengaturanMataUang();
 void pengaturanSistem();
 void menuAdmin();
+
+// menu user
 void tampilkanBarang(Barang *barang, int jumlahBarang);
 void perhitunganBiaya(Barang *barang, int jumlahBarang);
 void pilihBarang(Barang *barang, int jumlahBarang);
 void subMenuImpor();
+
 void tampilkanBarangEkspor(Barang *barang, int jumlahBarang);
 void tambahBarangEkspor(Barang *barang, int *jumlahBarang);
-void subMenuEkspor() ;
+void subMenuEkspor();
 void menuUser();
 
 // Fungsi utama (main)
@@ -63,7 +73,7 @@ int main() {
 
     do {
         // Menampilkan menu utama
-        printf("\n=== Sistem Ekspor-Impor ===\n");
+        printf("\n=== Selamat Datang di Sistem Ekspor-Impor ===\n");
         printf("1. Login sebagai Admin\n");
         printf("2. Login sebagai User\n");
         printf("3. Daftar User\n");
@@ -107,13 +117,15 @@ int main() {
     return 0;
 }
 
+//=== fungsi-fungsi ===
+
 // Fungsi untuk daftar user
 void daftarUser() {
     FILE *file;
     User newUser;
 
-    // Membuka file untuk penulisan (mode "a" untuk append)
-    file = fopen("user_data.txt", "a");
+    // Membuka file untuk penulisan (mode "ab" untuk append binary)
+    file = fopen("user_data.dat", "ab");
     if (file == NULL) {
         printf("Error: Gagal membuka file untuk penulisan.\n");
         exit(1);
@@ -127,13 +139,14 @@ void daftarUser() {
     scanf("%s", newUser.password);
 
     // Menyimpan informasi pengguna ke dalam file
-    fprintf(file, "%s %s\n", newUser.username, newUser.password);
+    fwrite(&newUser, sizeof(User), 1, file);
 
     // Menutup file
     fclose(file);
 
     printf("Pengguna baru berhasil didaftarkan.\n");
 }
+
 
 // Fungsi untuk login sebagai Admin
 int loginAdmin() {
@@ -149,7 +162,7 @@ int loginAdmin() {
     scanf("%s", password);
 
     // Memeriksa kevalidan username dan password
-    if (strcmp(username, "admin") == 0 && strcmp(password, "admin123") == 0) {
+    if (strcmp(username, "admin") == 0 && strcmp(password, "passwordadmin") == 0) {
         printf("Login sebagai Admin berhasil.\n");
         return 1; // Return 1 jika login berhasil
     } else {
@@ -166,9 +179,9 @@ int loginUser() {
     char userPassword[50];
 
     // Membuka file yang berisi informasi user
-    file = fopen("user_data.txt", "r");
+    file = fopen("user_data.dat", "rb");
     if (file == NULL) {
-        printf("Error: File user_data.txt tidak ditemukan.\n");
+        printf("Error: File user_data.dat tidak ditemukan.\n");
         exit(1);
     }
 
@@ -181,7 +194,7 @@ int loginUser() {
 
     // Memeriksa kevalidan username dan password
     int valid = 0; // Flag untuk menandakan kevalidan login
-    while (fscanf(file, "%s %s", userLogin.username, userLogin.password) == 2) {
+    while (fread(&userLogin, sizeof(User), 1, file) == 1) {
         if (strcmp(userUsername, userLogin.username) == 0 && strcmp(userPassword, userLogin.password) == 0) {
             valid = 1;
             break;
@@ -201,21 +214,23 @@ int loginUser() {
 }
 
 // Fungsi untuk menampilkan daftar pengguna (fitur 1)
-void lihatDaftarPengguna() {
+void pengelolaanPengguna() {
     FILE *file;
     User user;
 
     // Membuka file yang berisi informasi pengguna
-    file = fopen("user_data.txt", "r");
+    file = fopen("user_data.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
     if (file == NULL) {
-        printf("Error: File user_data.txt tidak ditemukan.\n");
+        printf("Error: File user_data.dat tidak ditemukan.\n");
         exit(1);
     }
 
     // Menampilkan daftar pengguna
     printf("\n=== Daftar Pengguna ===\n");
     printf("Username\tPassword\n");
-    while (fscanf(file, "%s %s", user.username, user.password) == 2) {
+
+    // Membaca data pengguna dari file biner
+    while (fread(&user, sizeof(User), 1, file) == 1) {
         printf("%-15s %s\n", user.username, user.password);
     }
 
@@ -239,14 +254,14 @@ void laporanImpor() {
     int jumlahTransaksi = 0; // Jumlah transaksi impor
 
     // Membuka file yang berisi informasi transaksi impor
-    file = fopen("laporan_impor.txt", "r");
+    file = fopen("laporan_impor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
     if (file == NULL) {
-        printf("Error: File laporan_impor.txt tidak ditemukan.\n");
+        printf("Error: File laporan_impor.dat tidak ditemukan.\n");
         return;
     }
 
     // Membaca informasi transaksi impor
-    while (fscanf(file, "%s %s %d %f", transaksi.username, transaksi.barang, &transaksi.jumlahBarang, &transaksi.hargaTotal) == 4) {
+    while (fread(&transaksi, sizeof(Transaksi), 1, file) == 1) {
         jumlahTransaksi++;
     }
 
@@ -268,14 +283,14 @@ void laporanEkspor() {
     int jumlahTransaksi = 0; // Jumlah transaksi ekspor
 
     // Membuka file yang berisi informasi transaksi ekspor
-    file = fopen("laporan_ekspor.txt", "r");
+    file = fopen("laporan_ekspor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
     if (file == NULL) {
-        printf("Error: File laporan_ekspor.txt tidak ditemukan.\n");
+        printf("Error: File laporan_ekspor.dat tidak ditemukan.\n");
         return;
     }
 
     // Membaca informasi transaksi ekspor
-    while (fscanf(file, "%s %s %d %f", transaksi.username, transaksi.barang, &transaksi.jumlahBarang, &transaksi.hargaTotal) == 4) {
+    while (fread(&transaksi, sizeof(Transaksi), 1, file) == 1) {
         jumlahTransaksi++;
     }
 
@@ -298,9 +313,9 @@ void updateBarang() {
     int pilihan;
 
     // Membuka file yang berisi informasi barang
-    file = fopen("data_barang.txt", "a+");
+    file = fopen("data_barang.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
     if (file == NULL) {
-        printf("Error: File data_barang.txt tidak dapat diakses.\n");
+        printf("Error: File data_barang.dat tidak dapat diakses.\n");
         return;
     }
 
@@ -325,7 +340,7 @@ void updateBarang() {
                 scanf("%d", &barang.stok);
 
                 // Menyimpan informasi barang ke dalam file
-                fprintf(file, "%s %.2f %d\n", barang.nama, barang.harga, barang.stok);
+                fwrite(&barang, sizeof(Barang), 1, file);
 
                 printf("Barang berhasil ditambahkan.\n");
                 break;
@@ -342,6 +357,7 @@ void updateBarang() {
     fclose(file);
 }
 
+
 // Fungsi untuk pengaturan mata uang (sub-menu dari pengaturan sistem)
 void pengaturanMataUang() {
     FILE *file;
@@ -349,9 +365,9 @@ void pengaturanMataUang() {
     int pilihan;
 
     // Membuka file yang berisi informasi mata uang
-    file = fopen("data_mata_uang.txt", "a+");
+    file = fopen("data_mata_uang.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
     if (file == NULL) {
-        printf("Error: File data_mata_uang.txt tidak dapat diakses.\n");
+        printf("Error: File data_mata_uang.dat tidak dapat diakses.\n");
         return;
     }
 
@@ -373,7 +389,7 @@ void pengaturanMataUang() {
                 scanf("%f", &mataUang.kurs);
 
                 // Menyimpan informasi mata uang ke dalam file
-                fprintf(file, "%s %.2f\n", mataUang.kode, mataUang.kurs);
+                fwrite(&mataUang, sizeof(MataUang), 1, file);
 
                 printf("Mata uang berhasil ditambahkan.\n");
                 break;
@@ -434,7 +450,7 @@ void menuAdmin() {
 
         switch (pilihan) {
             case 1:
-                lihatDaftarPengguna();
+                pengelolaanPengguna();
                 break;
             case 2:
                 printf("\n=== Laporan Transaksi ===\n");
