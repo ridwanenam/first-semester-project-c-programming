@@ -62,7 +62,7 @@ void prosesImpor(Barang *barang, int jumlahBarang);
 void prosesEkspor(Barang *barang, int jumlahBarang);
 void menuUser();
 
-// Fungsi utama (main)
+
 int main() {
     int pilihan;
 
@@ -91,7 +91,6 @@ int main() {
                 // Login sebagai User
                 if (loginUser()) {
                     // Lanjutkan ke menu User jika login berhasil
-                    // menuUser();
                     if (pelangganIndexLogin != -1) {
                         menuUser();
                     }
@@ -180,7 +179,7 @@ int loginUser() {
     file = fopen("user_data.dat", "rb");
     if (file == NULL) {
         printf("Error: File user_data.dat tidak ditemukan.\n");
-        exit(1);
+        return 0; // Kembalikan 0 untuk menandakan kegagalan login
     }
 
     // Meminta pengguna memasukkan username dan password User
@@ -192,25 +191,28 @@ int loginUser() {
 
     // Memeriksa kevalidan username dan password
     int valid = 0; // Flag untuk menandakan kevalidan login
+    int index = 0; // Indeks pengguna
     while (fread(&userLogin, sizeof(User), 1, file) == 1) {
         if (strcmp(userUsername, userLogin.username) == 0 && strcmp(userPassword, userLogin.password) == 0) {
             valid = 1;
+            pelangganIndexLogin = index; // Simpan indeks pengguna yang berhasil login
             break;
         }
+        index++;
     }
 
     // Menutup file
     fclose(file);
 
-    // Jika login valid, lanjutkan ke menu User
+    // Jika login valid, kembalikan 1
     if (valid) {
         printf("Login User berhasil.\n");
+        return 1;
     } else {
-        printf("Login User gagal. Keluar dari program.\n");
-        exit(1);
+        printf("Login User gagal.\n");
+        return 0; // Kembalikan 0 untuk menandakan kegagalan login
     }
 }
-
 // Fungsi untuk menampilkan daftar pengguna
 void pengelolaanPengguna() {
     FILE *file;
@@ -593,10 +595,18 @@ void menuUser() {
 
         switch (pilihan) {
             case 1:
-                prosesImpor(barang, jumlahBarang);
+                if (pelangganIndexLogin != -1) {
+                    prosesImpor(barang, jumlahBarang);
+                } else {
+                    printf("Anda belum login sebagai User.\n");
+                }
                 break;
             case 2:
-                prosesEkspor(barang, *&jumlahBarang);
+                if (pelangganIndexLogin != -1) {
+                    prosesEkspor(barang, jumlahBarang);
+                } else {
+                    printf("Anda belum login sebagai User.\n");
+                }
                 break;
             case 3:
                 printf("Keluar dari Menu User.\n");
