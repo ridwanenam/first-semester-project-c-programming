@@ -39,7 +39,7 @@ struct MataUang {
 int pelangganIndexLogin = -1;
 
 // Deklarasi global
-struct Barang barang[50];  
+struct Barang barang[100];  
 int jumlahBarang = 0;  
 struct Transaksi transaksi[50]; 
 int jumlahTransaksi = 0; 
@@ -66,8 +66,8 @@ void pengaturanSistem(struct Barang *barang, int *jumlahBarang);
 void menuAdmin();
 
 // fungsi user
-void prosesImpor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaftar);
-void prosesEkspor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaftar);
+void prosesImpor();
+void prosesEkspor();
 void menuUser();
 
 int main() {
@@ -263,8 +263,14 @@ void pengelolaanPengguna() {
 void tampilkanLaporan(struct Transaksi *transaksi, int jumlahTransaksi, const char *jenisTransaksi) {
     printf("\n=== Laporan %s ===\n", jenisTransaksi);
     printf("Username, Barang, Jumlah, Harga Total:\n");
+    
     for (int i = 0; i < jumlahTransaksi; i++) {
-        printf("%s, %s, %d, %.2f\n", transaksi[i].username, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+        // Menyesuaikan tampilan harga total sesuai jenis transaksi
+        if (strcmp(jenisTransaksi, "Impor") == 0) {
+            printf("%s, %s, %d, %.2f IDR\n", transaksi[i].username, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+        } else if (strcmp(jenisTransaksi, "Ekspor") == 0) {
+            printf("%s, %s, %d, %.2f USD\n", transaksi[i].username, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+        }
     }
 }
 
@@ -275,7 +281,7 @@ void laporanImpor() {
     int jumlahTransaksi = 0; 
 
     // Membuka file yang berisi informasi transaksi impor
-    file = fopen("laporan_impor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
+    file = fopen("laporan_impor.dat", "rb");
     if (file == NULL) {
         printf("Error: File laporan_impor.dat tidak ditemukan.\n");
         return;
@@ -304,7 +310,7 @@ void laporanEkspor() {
     int jumlahTransaksi = 0; 
 
     // Membuka file yang berisi informasi transaksi ekspor
-    file = fopen("laporan_ekspor.dat", "rb"); // Mengganti mode ke "rb" untuk membaca file biner
+    file = fopen("laporan_ekspor.dat", "rb");
     if (file == NULL) {
         printf("Error: File laporan_ekspor.dat tidak ditemukan.\n");
         return;
@@ -469,54 +475,66 @@ void menuAdmin() {
 }
 
 // Fungsi untuk proses impor barang
-void prosesImpor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaftar) {
+void prosesImpor() {
     FILE *fileImpor;
     struct Transaksi transaksi;
     int indeksBarang, jumlahBarangImpor;
-    float hargaTotal, kurs;
-    char kode[4];
+    float hargaTotal;
 
     // Membuka file yang berisi informasi transaksi impor
-    fileImpor = fopen("laporan_impor.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    fileImpor = fopen("laporan_impor.dat", "ab+");
     if (fileImpor == NULL) {
         printf("Error: File laporan_impor.dat tidak dapat diakses.\n");
         return;
     }
 
-    // Membuka file yang berisi informasi barang
-    FILE *fileBarang = fopen("data_barang.dat", "ab+");
+    // Menampilkan list barang termasuk harganya dan stoknya dari file data_barang.dat
+    FILE *fileBarang = fopen("data_barang.dat", "rb");
     if (fileBarang == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
         fclose(fileImpor);
         return;
     }
 
-    // Menampilkan list barang termasuk harganya dan stoknya dari array barang
     printf("List Barang:\n");
-    for (int i = 0; i < *jumlahBarangDaftar; i++) {
-        printf("%d. %s - Harga: %.2f, Stok: %d\n", i + 1, barang[i].nama, barang[i].harga, barang[i].stok);
+    struct Barang tempBarang;
+    int nomorBarang = 1;
+
+    while (fread(&tempBarang, sizeof(struct Barang), 1, fileBarang) == 1) {
+        printf("%d. %s - Harga: %.2f USD, Stok: %d\n", nomorBarang, tempBarang.nama, tempBarang.harga, tempBarang.stok);
+        nomorBarang++;
     }
+
+    fclose(fileBarang);
 
     // Meminta pengguna memilih barang yang akan diimpor
     printf("Masukkan nomor barang yang akan diimpor: ");
     scanf("%d", &indeksBarang);
 
     // Memastikan nomor barang valid
-    if (indeksBarang < 1 || indeksBarang > *jumlahBarangDaftar) {
+    if (indeksBarang < 1 || indeksBarang > nomorBarang - 1) {
         printf("Error: Nomor barang tidak valid.\n");
         fclose(fileImpor);
-        fclose(fileBarang);
         return;
     }
 
-    indeksBarang--; // Mengubah ke indeks array yang sesuai
+    // Membaca stok barang dari file
+    fileBarang = fopen("data_barang.dat", "rb+");
+    if (fileBarang == NULL) {
+        printf("Error: File data_barang.dat tidak dapat diakses.\n");
+        fclose(fileImpor);
+        return;
+    }
+
+    fseek(fileBarang, (indeksBarang - 1) * sizeof(struct Barang), SEEK_SET);
+    fread(&tempBarang, sizeof(struct Barang), 1, fileBarang);
 
     // Meminta pengguna memasukkan jumlah barang yang diimpor
     printf("Masukkan jumlah barang yang diimpor: ");
     scanf("%d", &jumlahBarangImpor);
 
     // Memeriksa stok barang cukup untuk diimpor
-    if (jumlahBarangImpor > barang[indeksBarang].stok) {
+    if (jumlahBarangImpor > tempBarang.stok) {
         printf("Error: Stok barang tidak cukup untuk diimpor.\n");
         fclose(fileImpor);
         fclose(fileBarang);
@@ -526,55 +544,48 @@ void prosesImpor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaft
     // Membersihkan buffer input
     while (getchar() != '\n');
 
-    // Memeriksa kurs mata uang
-    printf("Masukkan kurs mata uang (1 USD ke mata uang tujuan): ");
-    if (scanf("%3s", kode) != 1) {
-        printf("Error: Masukkan kurs mata uang yang valid.\n");
-        fclose(fileImpor);
-        fclose(fileBarang);
-        return;
-    }
-
-    // Menghitung harga total dengan memperhitungkan kurs mata uang
-    hargaTotal = jumlahBarangImpor * barang[indeksBarang].harga * atof(kode);
+    // Menghitung harga total dalam IDR
+    hargaTotal = jumlahBarangImpor * tempBarang.harga * 15000;
 
     // Memasukkan informasi transaksi impor ke dalam file
     if (pelangganIndexLogin != -1) {
-        strcpy(transaksi.username, daftarPelanggan[pelangganIndexLogin].username);
+        strcpy(transaksi.username, "username_pelanggan");  // Ganti dengan username pelanggan yang sedang login
     } else {
         strcpy(transaksi.username, "admin");
     }
-    strcpy(transaksi.barang, barang[indeksBarang].nama); // Nama barang yang diimpor
+    strcpy(transaksi.barang, tempBarang.nama);
     transaksi.jumlahBarang = jumlahBarangImpor;
     transaksi.hargaTotal = hargaTotal;
 
     // Mengurangi stok barang
-    barang[indeksBarang].stok -= jumlahBarangImpor;
+    tempBarang.stok -= jumlahBarangImpor;
 
     // Menulis informasi transaksi impor ke dalam file
-    fwrite(&transaksi, sizeof(struct Transaksi), 1, fileImpor);
+    fseek(fileBarang, (indeksBarang - 1) * sizeof(struct Barang), SEEK_SET);
+    fwrite(&tempBarang, sizeof(struct Barang), 1, fileBarang);
 
-    // Menulis informasi transaksi impor ke dalam file data_barang.dat
-    fwrite(&transaksi, sizeof(struct Transaksi), 1, fileBarang);
+    fwrite(&transaksi, sizeof(struct Transaksi), 1, fileImpor);
 
     // Menutup file
     fclose(fileImpor);
     fclose(fileBarang);
 
     // Menampilkan laporan impor
-    laporanImpor();
-
-    printf("Impor barang berhasil.\n");
+    printf("\nProses impor telah berhasil:\n");
+    printf("Barang: %s\n", transaksi.barang);
+    printf("Harga Total (IDR): %.2f\n", transaksi.hargaTotal);
+    printf("Jumlah Stok yang Diimpor: %d\n", transaksi.jumlahBarang);
+    printf("Kembali ke Menu User.\n");
 }
 
+
 // Fungsi untuk proses ekspor barang
-void prosesEkspor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaftar) {
+void prosesEkspor() {
     FILE *file;
     struct Barang newBarang;
-    char kode[4];
 
     // Membuka file yang berisi informasi barang
-    file = fopen("data_barang.dat", "ab+"); // Mengganti mode ke "ab+" untuk membaca dan menulis file biner
+    file = fopen("data_barang.dat", "ab+");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
         return;
@@ -584,19 +595,17 @@ void prosesEkspor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaf
     printf("Masukkan nama barang: ");
     scanf("%s", newBarang.nama);
 
-    printf("Masukkan harga barang: ");
+    printf("Masukkan harga barang (IDR): ");
     scanf("%f", &newBarang.harga);
 
     printf("Masukkan stok barang: ");
     scanf("%d", &newBarang.stok);
 
+    // Konversi harga barang ke USD
+    newBarang.harga /= 15000;
+
     // Menyimpan informasi barang ke dalam file
     fwrite(&newBarang, sizeof(struct Barang), 1, file);
-
-    // Menambah jumlah barang pada daftarBarang
-    barang[*jumlahBarang] = newBarang;
-    (*jumlahBarang)++;
-    (*jumlahBarangDaftar)++;
 
     // Menutup file
     fclose(file);
@@ -605,12 +614,6 @@ void prosesEkspor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaf
     struct Transaksi transaksi;
     transaksi.jumlahBarang = newBarang.stok; // Jumlah barang yang diekspor sama dengan stok barang
     transaksi.hargaTotal = newBarang.harga * transaksi.jumlahBarang; // Harga total dihitung berdasarkan stok dan harga per barang
-    if (pelangganIndexLogin != -1) {
-        strcpy(transaksi.username, daftarPelanggan[pelangganIndexLogin].username);
-    } else {
-        strcpy(transaksi.username, "admin");
-    }
-    strcpy(transaksi.barang, newBarang.nama);
 
     // Membuka file yang berisi informasi transaksi ekspor
     file = fopen("laporan_ekspor.dat", "ab+");
@@ -619,26 +622,40 @@ void prosesEkspor(struct Barang *barang, int *jumlahBarang, int *jumlahBarangDaf
         return;
     }
 
+    // Menggunakan username dari pengguna yang sedang login
+    if (pelangganIndexLogin != -1) {
+        strcpy(transaksi.username, "username_pelanggan");  // Ganti dengan username pelanggan yang sedang login
+    } else {
+        strcpy(transaksi.username, "admin");
+    }
+    strcpy(transaksi.barang, newBarang.nama);
+
     // Menyimpan informasi transaksi ekspor ke dalam file
     fwrite(&transaksi, sizeof(struct Transaksi), 1, file);
 
     // Menutup file
     fclose(file);
 
-    // Menambahkan transaksi ekspor ke data_barang.dat
-    file = fopen("data_barang.dat", "ab+"); // Membuka file data_barang.dat kembali
+    // Menampilkan pesan bahwa proses ekspor selesai
+    printf("Proses ekspor telah berhasil.\n");
+    printf("Kembali ke Menu User.\n");
+
+    // Menampilkan list barang setelah proses ekspor
+    printf("List Barang Setelah Proses Ekspor:\n");
+    file = fopen("data_barang.dat", "rb");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
         return;
     }
 
-    // Menyimpan informasi barang ke dalam file data_barang.dat
-    fwrite(&newBarang, sizeof(struct Barang), 1, file);
+    int nomorBarang = 1;
+    while (fread(&newBarang, sizeof(struct Barang), 1, file) == 1) {
+        printf("%d. %s - Harga: %.2f USD, Stok: %d\n", nomorBarang, newBarang.nama, newBarang.harga, newBarang.stok);
+        nomorBarang++;
+    }
 
     // Menutup file
     fclose(file);
-
-    printf("Ekspor barang berhasil.\n");
 }
 
 
@@ -658,7 +675,7 @@ void menuUser() {
             case 1:
                 if (pelangganIndexLogin != -1) {
                     // Menggunakan jumlahBarang sebagai argument kedua (bukan alamatnya)
-                    prosesImpor(barang, &jumlahBarang, &jumlahBarangDaftar);
+                    prosesImpor();
                 } else {
                     printf("Anda belum login sebagai User.\n");
                 }
@@ -666,7 +683,7 @@ void menuUser() {
             case 2:
                 if (pelangganIndexLogin != -1) {
                     // Menggunakan alamat dari jumlahBarang sebagai argument kedua
-                    prosesEkspor(barang, &jumlahBarang, &jumlahBarangDaftar);
+                    prosesEkspor();
                 } else {
                     printf("Anda belum login sebagai User.\n");
                 }
@@ -680,3 +697,9 @@ void menuUser() {
         }
     } while (pilihan != 3);
 }
+
+// YANG BELUM = PENGATURAN SISTEM
+// 1. UPDATE BARANG
+// 2. PENGATURAN MATA UANG
+
+// NYOBAIN HUBUNGAN IDR DAN USD DULU AJA
