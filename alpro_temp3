@@ -65,6 +65,14 @@ void prosesEkspor();
 void menuUser();
 
 int main() {
+
+    FILE *fileDataBarang = fopen("data_barang.dat", "ab+");
+    if (fileDataBarang == NULL) {
+    printf("Error: File data_barang.dat tidak dapat dibuka atau dibuat.\n");
+    exit(1);
+    }
+    fclose(fileDataBarang);
+
     int pilihan;
     bacaDataBarang(daftarBarang, &jumlahBarang);
 
@@ -354,7 +362,7 @@ void tampilkanListBarang(struct Barang *barang, int jumlahBarang) {
 }
 
 void updateBarang(struct Barang *barang, int *jumlahBarang) {
-    FILE *file = fopen("data_barang.dat", "rb+");
+    FILE *file = fopen("data_barang.dat", "rb");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat dibuka.\n");
         return;
