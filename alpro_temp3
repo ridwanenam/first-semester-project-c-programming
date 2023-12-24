@@ -362,7 +362,7 @@ void tampilkanListBarang(struct Barang *barang, int jumlahBarang) {
 }
 
 void updateBarang(struct Barang *barang, int *jumlahBarang) {
-    FILE *file = fopen("data_barang.dat", "rb");
+    FILE *file = fopen("data_barang.dat", "rb+");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat dibuka.\n");
         return;
@@ -578,6 +578,8 @@ void prosesImpor() {
     printf("Barang: %s\n", transaksi.barang);
     printf("Harga Total (IDR): %.2f\n", transaksi.hargaTotal);
     printf("Jumlah Stok yang Diimpor: %d\n", transaksi.jumlahBarang);
+
+    bacaDataBarang(daftarBarang, &jumlahBarang);
 }
 
 
@@ -643,6 +645,7 @@ void prosesEkspor() {
 
     // Menampilkan list barang setelah proses ekspor
     printf("List Barang Setelah Proses Ekspor:\n");
+    bacaDataBarang(daftarBarang, &jumlahBarang);
     file = fopen("data_barang.dat", "rb");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
