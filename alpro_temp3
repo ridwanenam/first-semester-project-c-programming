@@ -678,7 +678,6 @@ void menuUser() {
         switch (pilihan) {
             case 1:
                 if (pelangganIndexLogin != -1) {
-                    // Menggunakan jumlahBarang sebagai argument kedua (bukan alamatnya)
                     prosesImpor();
                 } else {
                     printf("Anda belum login sebagai User.\n");
@@ -686,7 +685,6 @@ void menuUser() {
                 break;
             case 2:
                 if (pelangganIndexLogin != -1) {
-                    // Menggunakan alamat dari jumlahBarang sebagai argument kedua
                     prosesEkspor();
                 } else {
                     printf("Anda belum login sebagai User.\n");
