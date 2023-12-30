@@ -267,10 +267,13 @@ void pengelolaanPengguna() {
     printf("\n=== Daftar Pengguna ===\n");
     printf("Username:\tPassword:\n");
 
+    int nomorPengguna = 1;
+
     // Membaca data pengguna dari file biner
     while (fread(&username, sizeof(char[50]), 1, file) == 1) {
         fread(&password, sizeof(char[50]), 1, file);
-        printf("%s\t\t%s\n", username, password);
+        printf("%d. %s\t%s\n", nomorPengguna, username, password);
+        nomorPengguna++ ;
     }
 
     // Menutup file
