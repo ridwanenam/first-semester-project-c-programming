@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> // sleep/delay
 
 // Struktur data untuk menyimpan informasi user
 struct User {
@@ -19,8 +20,7 @@ struct Barang {
     char nama[50];
     float harga;
     int stok;
-    char satuanharga[20];
-    char satuanstok[20];
+    char satuan[20];
 };
 
 // Struktur data untuk menyimpan informasi transaksi
@@ -29,8 +29,7 @@ struct Transaksi {
     char barang[50];
     int jumlahBarang;
     float hargaTotal;
-    char satuanharga[20];
-    char satuanstok[20];
+    char satuan[20];
 };
 
 
@@ -67,6 +66,7 @@ void menuAdmin();
 void prosesImpor();
 void prosesEkspor();
 void menuUser();
+void gantiPasswordUser();
 
 int main() {
 
@@ -280,14 +280,14 @@ void pengelolaanPengguna() {
 // Fungsi untuk menampilkan laporan transaksi
 void tampilkanLaporan(struct Transaksi *transaksi, int jumlahTransaksi, const char *jenisTransaksi) {
     printf("\n=== Laporan %s ===\n", jenisTransaksi);
-    printf("Barang, Jumlah, Harga Total:\n");
-    
+    printf("[No. Barang - Jumlah, Harga Total:]\n");
+
     for (int i = 0; i < jumlahTransaksi; i++) {
         // Menyesuaikan tampilan harga total sesuai jenis transaksi
         if (strcmp(jenisTransaksi, "Impor") == 0) {
-            printf("%s, %d, %.2f IDR\n", transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+            printf("%d. %s - %d %s, %.2f IDR\n", i + 1, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].satuan, transaksi[i].hargaTotal);
         } else if (strcmp(jenisTransaksi, "Ekspor") == 0) {
-            printf("%s, %d, %.2f USD\n", transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].hargaTotal);
+            printf("%d. %s - %d %s, %.2f USD\n", i + 1, transaksi[i].barang, transaksi[i].jumlahBarang, transaksi[i].satuan, transaksi[i].hargaTotal);
         }
     }
 }
@@ -351,14 +351,15 @@ void laporanEkspor() {
 }
 
 
+
 void tampilkanListBarang(struct Barang *barang, int jumlahBarang) {
     printf("\n=== List Barang ===\n");
     for (int i = 0; i < jumlahBarang; i++) {
         // TEST
         if (barang[i].harga >= 1 && barang[i].harga <= 999) {
-            printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuanharga, barang[i].stok, barang[i].satuanstok);
+            printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuan, barang[i].stok, barang[i].satuan);
         } else {
-            printf("%d. %s - Harga: %.2f IDR/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuanharga, barang[i].stok, barang[i].satuanstok);
+            printf("%d. %s - Harga: %.2f IDR/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuan, barang[i].stok, barang[i].satuan);
         }
     }
 }
@@ -390,14 +391,11 @@ void updateBarang(struct Barang *barang, int *jumlahBarang) {
     printf("Masukkan harga baru untuk barang '%s': ", barang[indeksBarang].nama);
     scanf("%f", &barang[indeksBarang].harga);
 
-    printf("Masukkan satuan harga baru untuk barang '%s': ", barang[indeksBarang].nama);
-    scanf("%s", barang[indeksBarang].satuanharga);
-
     printf("Masukkan stok baru untuk barang '%s': ", barang[indeksBarang].nama);
     scanf("%d", &barang[indeksBarang].stok);
 
-    printf("Masukkan satuan stok baru untuk barang '%s': ", barang[indeksBarang].nama);
-    scanf("%s", barang[indeksBarang].satuanstok);
+    printf("Masukkan satuan baru untuk barang '%s': ", barang[indeksBarang].nama);
+    scanf("%s", barang[indeksBarang].satuan);
 
     file = fopen("data_barang.dat", "wb");
     if (file == NULL) {
@@ -512,7 +510,7 @@ void prosesImpor() {
     int nomorBarang = 1;
 
     while (fread(&tempBarang, sizeof(struct Barang), 1, fileBarang) == 1) {
-        printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", nomorBarang, tempBarang.nama, tempBarang.harga, tempBarang.satuanharga, tempBarang.stok, tempBarang.satuanstok);
+        printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", nomorBarang, tempBarang.nama, tempBarang.harga, tempBarang.satuan, tempBarang.stok, tempBarang.satuan);
         nomorBarang++;
     }
 
@@ -562,6 +560,7 @@ void prosesImpor() {
     strcpy(transaksi.barang, tempBarang.nama);
     transaksi.jumlahBarang = jumlahBarangImpor;
     transaksi.hargaTotal = hargaTotal;
+    strcpy(transaksi.satuan, tempBarang.satuan);
 
     // Mengurangi stok barang
     tempBarang.stok -= jumlahBarangImpor;
@@ -580,7 +579,7 @@ void prosesImpor() {
     printf("\nProses impor telah berhasil:\n");
     printf("Barang: %s\n", transaksi.barang);
     printf("Harga Total (IDR): %.2f IDR\n", transaksi.hargaTotal);
-    printf("Jumlah Stok yang Diimpor: %d %s\n", transaksi.jumlahBarang, tempBarang.satuanstok);
+    printf("Jumlah Stok yang Diimpor: %d %s\n", transaksi.jumlahBarang, tempBarang.satuan);
 
     // Membaca ulang data barang setelah proses impor
     bacaDataBarang(daftarBarang, &jumlahBarang);
@@ -606,14 +605,11 @@ void prosesEkspor() {
     printf("Masukkan harga barang (IDR): ");
     scanf("%f", &newBarang.harga);
 
-    printf("Masukkan satuan harga barang (misalnya: item, kg): ");
-    scanf("%s", newBarang.satuanharga);
-
     printf("Masukkan stok barang: ");
     scanf("%d", &newBarang.stok);
 
-    printf("Masukkan satuan stok barang (misalnya: item, kg): ");
-    scanf("%s", newBarang.satuanstok);
+    printf("Masukkan satuan untuk barang (misalnya: item, kg): ");
+    scanf("%s", newBarang.satuan);
 
     // Konversi harga barang ke USD
     newBarang.harga /= 15000;
@@ -628,6 +624,7 @@ void prosesEkspor() {
     struct Transaksi transaksi;
     transaksi.jumlahBarang = newBarang.stok; // Jumlah barang yang diekspor sama dengan stok barang
     transaksi.hargaTotal = newBarang.harga * transaksi.jumlahBarang; // Harga total dihitung berdasarkan stok dan harga per barang
+    strcpy(transaksi.satuan, newBarang.satuan);
 
     // Membuka file yang berisi informasi transaksi ekspor
     file = fopen("laporan_ekspor.dat", "ab+");
@@ -638,7 +635,7 @@ void prosesEkspor() {
 
     // Transaksi barang berupa nama barang yang baru
     strcpy(transaksi.barang, newBarang.nama);
-
+    
     // Menyimpan informasi transaksi ekspor ke dalam file
     fwrite(&transaksi, sizeof(struct Transaksi), 1, file);
 
@@ -659,7 +656,7 @@ void prosesEkspor() {
 
     int nomorBarang = 1;
     while (fread(&newBarang, sizeof(struct Barang), 1, file) == 1) {
-        printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", nomorBarang, newBarang.nama, newBarang.harga, newBarang.satuanharga, newBarang.stok, newBarang.satuanstok);
+        printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", nomorBarang, newBarang.nama, newBarang.harga, newBarang.satuan, newBarang.stok, newBarang.satuan);
         nomorBarang++;
     }
 
@@ -675,8 +672,9 @@ void menuUser() {
         printf("\n=== Menu User ===\n");
         printf("1. Sub Menu Impor\n");
         printf("2. Sub Menu Ekspor\n");
-        printf("3. Keluar\n");
-        printf("Pilih menu (1-3): ");
+        printf("3. Ganti Password\n");
+        printf("4. Keluar\n");
+        printf("Pilih menu (1-4): ");
         scanf("%d", &pilihan);
 
         switch (pilihan) {
@@ -695,11 +693,57 @@ void menuUser() {
                 }
                 break;
             case 3:
+                gantiPasswordUser();
+                break;
+            case 4:
                 printf("Keluar dari Menu User.\n");
                 break;
             default:
                 printf("Pilihan tidak valid.\n");
                 break;
         }
-    } while (pilihan != 3);
+    } while (pilihan != 4);
+}
+
+// Fungsi untuk mengganti password User
+void gantiPasswordUser() {
+    FILE *file;
+    struct User user;
+    char newPassword[50];
+
+    // Membuka file yang berisi informasi user
+    file = fopen("user_data.dat", "rb+");
+    if (file == NULL) {
+        printf("Error: File user_data.dat tidak ditemukan.\n");
+        return;
+    }
+
+    // Pindahkan pointer file ke posisi user yang sedang login
+    fseek(file, pelangganIndexLogin * sizeof(struct User), SEEK_SET);
+
+    // Membaca informasi user yang sedang login
+    fread(&user, sizeof(struct User), 1, file);
+
+    // Meminta pengguna memasukkan password baru
+    printf("\n=== Ganti Password ===\n");
+    printf("Masukkan password baru: ");
+    scanf("%s", newPassword);
+
+    // Mengganti password user
+    strcpy(user.password, newPassword);
+
+    // Pindahkan pointer file kembali ke posisi user yang sedang login
+    fseek(file, pelangganIndexLogin * sizeof(struct User), SEEK_SET);
+
+    // Menulis informasi user yang telah diupdate ke dalam file
+    fwrite(&user, sizeof(struct User), 1, file);
+
+    // Menutup file
+    fclose(file);
+
+    printf("Password berhasil diganti.\n");
+
+    sleep(1);
+    main();
+    
 }
