@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> // Delay
+
 
 // Struktur data untuk menyimpan informasi user
 struct User {
@@ -98,6 +100,7 @@ int main() {
                 menuAdmin();
             } else {
                 printf("Login sebagai Admin Gagal.\n");
+                sleep(1);
             }
             break;
         case 2:
@@ -115,6 +118,7 @@ int main() {
                         menuUser();
                     } else {
                         printf("Login User gagal.\n");
+                        sleep(1);
                     }
                     break;
                 case 2:
@@ -183,6 +187,7 @@ void daftarUser() {
     fclose(file);
 
     printf("Pengguna baru berhasil didaftarkan.\n");
+    sleep(1);
 }
 
 
@@ -208,6 +213,7 @@ int loginAdmin() {
         printf("Login sebagai Admin gagal.\n");
         return 0; // Return 0 jika login gagal
     }
+    sleep(1);
 }
 
 // Fungsi untuk login sebagai User
@@ -248,6 +254,7 @@ int loginUser() {
     // Jika login tidak valid, tampilkan pesan dan kembalikan 0
     printf("Login User gagal.\n");
     return 0; // Kembalikan 0 untuk menandakan kegagalan login
+    sleep(1);
 }
 
 // Fungsi untuk menampilkan daftar pengguna
@@ -359,7 +366,7 @@ void tampilkanListBarang(struct Barang *barang, int jumlahBarang) {
     printf("\n=== List Barang ===\n");
     for (int i = 0; i < jumlahBarang; i++) {
         // TEST
-        if (barang[i].harga >= 1 && barang[i].harga <= 999) {
+        if (barang[i].harga >= 0.01 && barang[i].harga <= 1999.0) {
             printf("%d. %s - Harga: %.2f USD/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuan, barang[i].stok, barang[i].satuan);
         } else {
             printf("%d. %s - Harga: %.2f IDR/%s, Stok: %d %s\n", i + 1, barang[i].nama, barang[i].harga, barang[i].satuan, barang[i].stok, barang[i].satuan);
