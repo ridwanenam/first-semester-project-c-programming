@@ -64,6 +64,7 @@ void pengaturanSistem(struct Barang *barang, int *jumlahBarang);
 void menuAdmin();
 
 // Fungsi user
+void opsiMasukUser();
 void prosesImpor();
 void prosesEkspor();
 void menuUser();
@@ -84,13 +85,14 @@ int main() {
 
     do {
     system("cls");
-    printf("\n=== Selamat Datang di Sistem Ekspor-Impor ===\n");
-    printf("1. Pengguna Admin\n");
-    printf("2. Pengguna User\n");
-    printf("3. Keluar\n");
-    printf("Pilih menu (1-3): ");
+    printf("\n===== SELAMAT DATANG DI SITEM EKSPOR-IMPOR =====\n");
+    printf("||  1. Pengguna Admin                         ||\n");
+    printf("||  2. Pengguna User                          ||\n");
+    printf("||  3. Keluar                                 ||\n");
+    printf("================================================\n");
+    printf("    Pilih menu (1-3): ");
     scanf("%d", &pilihan);
-
+    
     // Menggunakan switch case untuk memilih menu
     switch (pilihan) {
         case 1:
@@ -99,36 +101,14 @@ int main() {
                 // Lanjutkan ke menu Admin jika login berhasil
                 menuAdmin();
             } else {
-                printf("Login sebagai Admin Gagal.\n");
-                sleep(1);
+                printf("\nLogin sebagai Admin Gagal.\n");
+                printf("Silahkan login kembali\n");
+                sleep(1.5);
             }
             break;
         case 2:
             // Tampilkan opsi untuk User (login/daftar)
-            printf("\nPilih opsi User:\n");
-            printf("1. Login User\n");
-            printf("2. Daftar User\n");
-            printf("Masukkan pilihan Anda: ");
-            int opsiUser;
-            scanf("%d", &opsiUser);
-
-            switch (opsiUser) {
-                case 1:
-                    if (loginUser()) {
-                        menuUser();
-                    } else {
-                        printf("Login User gagal.\n");
-                        sleep(1);
-                    }
-                    break;
-                case 2:
-                    daftarUser();
-                    break;
-                default:
-                    printf("Opsi tidak valid. Silakan coba lagi.\n");
-                    break;
-            }
-            break;
+            opsiMasukUser();
         case 3:
             printf("Keluar dari Sistem Ekspor-Impor.\n");
             // Reset nilai pelangganIndexLogin setelah logout
@@ -187,7 +167,9 @@ void daftarUser() {
     fclose(file);
 
     printf("Pengguna baru berhasil didaftarkan.\n");
-    sleep(1);
+    sleep(1.5);
+    system("cls");
+    opsiMasukUser();
 }
 
 
@@ -195,9 +177,8 @@ void daftarUser() {
 int loginAdmin() {
     char username[20];
     char password[20];
-
     // Meminta pengguna memasukkan username
-    printf("\n===Login Admin===\n");
+    printf("\n============ LOGIN ADMIN ============\n");
     printf("Masukkan username Admin: ");
     scanf("%s", username);
 
@@ -210,7 +191,6 @@ int loginAdmin() {
         printf("Login sebagai Admin berhasil.\n");
         return 1; // Return 1 jika login berhasil
     } else {
-        printf("Login sebagai Admin gagal.\n");
         return 0; // Return 0 jika login gagal
     }
     sleep(1);
@@ -231,7 +211,7 @@ int loginUser() {
     }
 
     // Meminta pengguna memasukkan username dan password User
-    printf("\n===Login User===\n");
+    printf("\n============ LOGIN USER ============\n");
     printf("Masukkan username User: ");
     scanf("%s", userUsername);
 
@@ -271,15 +251,14 @@ void pengelolaanPengguna() {
     }
 
     // Menampilkan daftar pengguna
-    printf("\n=== Daftar Pengguna ===\n");
-    printf("Username:\tPassword:\n");
+    printf("\n=== Daftar Pengguna ===");
 
     int nomorPengguna = 1;
 
     // Membaca data pengguna dari file biner
     while (fread(&username, sizeof(char[50]), 1, file) == 1) {
         fread(&password, sizeof(char[50]), 1, file);
-        printf("%d. %s\t%s\n", nomorPengguna, username, password);
+        printf("\n%d. Username:%s\n   Password:%s\n", nomorPengguna, username, password);
         nomorPengguna++ ;
     }
 
@@ -304,6 +283,7 @@ void tampilkanLaporan(struct Transaksi *transaksi, int jumlahTransaksi, const ch
 
 // Fungsi untuk menampilkan laporan impor
 void laporanImpor() {
+    system("cls");
     FILE *file;
     struct Transaksi transaksi[50]; 
     int jumlahTransaksi = 0; 
@@ -363,7 +343,7 @@ void laporanEkspor() {
 
 
 void tampilkanListBarang(struct Barang *barang, int jumlahBarang) {
-    printf("\n=== List Barang ===\n");
+    printf("\n============= List Barang =============\n");
     for (int i = 0; i < jumlahBarang; i++) {
         // TEST
         if (barang[i].harga >= 0.01 && barang[i].harga <= 1999.0) {
@@ -418,6 +398,7 @@ void updateBarang(struct Barang *barang, int *jumlahBarang) {
 
     printf("\nList Barang Setelah Diubah:");
     tampilkanListBarang(barang, *jumlahBarang);
+
 }
 
 
@@ -435,9 +416,12 @@ void pengaturanSistem(struct Barang *barang, int *jumlahBarang) {
         switch (pilihan) {
             case 1:
                 updateBarang(barang, jumlahBarang);
+                system("pause");
+                system("cls");
                 break;
             case 2:
                 printf("Kembali ke Menu Admin.\n");
+                system("cls");
                 break;
             default:
                 printf("Pilihan tidak valid.\n");
@@ -451,17 +435,21 @@ void menuAdmin() {
     int pilihan;
 
     do {
-        printf("\n=== Menu Admin ===\n");
-        printf("1. Lihat Daftar Pengguna\n");
-        printf("2. Laporan Transaksi\n");
-        printf("3. Pengaturan Barang\n");
-        printf("4. Keluar\n");
-        printf("Pilih menu (1-4): ");
+        printf("\n======== Menu Admin ========\n");
+        printf("||  1. Lihat Daftar Pengguna ||\n");
+        printf("||  2. Laporan Transaksi     ||\n");
+        printf("||  3. Pengaturan Barang     ||\n");
+        printf("||  4. Keluar                ||\n");
+        printf("===============================\n");
+        printf("    Pilih menu (1-4): ");
         scanf("%d", &pilihan);
+        system("cls");
 
         switch (pilihan) {
             case 1:
                 pengelolaanPengguna();
+                system("pause");
+                system("cls");
                 break;
             case 2:
                 printf("\n=== Laporan Transaksi ===\n");
@@ -471,14 +459,18 @@ void menuAdmin() {
                 scanf("%d", &pilihan);
                 if (pilihan == 1) {
                     laporanImpor();
+                    system("pause");
+                    system("cls");
                 } else if (pilihan == 2) {
                     laporanEkspor();
+                    system("pause");
+                    system("cls");
                 } else {
                     printf("Pilihan tidak valid.\n");
                 }
                 break;
             case 3:
-                pengaturanSistem(daftarBarang, &jumlahBarang);;
+                pengaturanSistem(daftarBarang, &jumlahBarang);
                 break;
             case 4:
                 printf("Keluar dari Menu Admin.\n");
@@ -512,7 +504,7 @@ void prosesImpor() {
         return;
     }
 
-    printf("\n===List Barang:===\n");
+    printf("\n============= List Barang =============\n");
     struct Barang tempBarang;
     int nomorBarang = 1;
 
@@ -598,6 +590,7 @@ void prosesEkspor() {
     struct Barang newBarang;
 
     // Membuka file yang berisi informasi barang
+
     file = fopen("data_barang.dat", "ab+");
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
@@ -656,6 +649,7 @@ void prosesEkspor() {
     printf("\nList Barang Setelah Proses Ekspor:\n");
     bacaDataBarang(daftarBarang, &jumlahBarang);
     file = fopen("data_barang.dat", "rb");
+
     if (file == NULL) {
         printf("Error: File data_barang.dat tidak dapat diakses.\n");
         return;
@@ -667,22 +661,56 @@ void prosesEkspor() {
         nomorBarang++;
     }
 
+    system("pause");
+    system("cls");
+
     // Menutup file
     fclose(file);
 }
 
+void opsiMasukUser() {
+            printf("\nPilih opsi User:\n");
+            printf("1. Login User\n");
+            printf("2. Daftar User\n");
+            printf("3. Kembali ke Login\n");
+            printf("Masukkan pilihan Anda: ");
+            int opsiUser;
+            scanf("%d", &opsiUser);
+
+            switch (opsiUser) {
+                case 1:
+                    if (loginUser()) {
+                        menuUser();
+                    } else {
+                        printf("Login User gagal.\n");
+                        sleep(1);
+                    }
+                    break;
+                case 2:
+                    daftarUser();
+                    break;
+                case 3:
+                    main();
+                    break;
+                default:
+                    printf("Opsi tidak valid. Silakan coba lagi.\n");
+                    break;
+}
+}
 
 void menuUser() {
     int pilihan;
 
     do {
-        printf("\n=== Menu User ===\n");
-        printf("1. Sub Menu Impor\n");
-        printf("2. Sub Menu Ekspor\n");
-        printf("3. Ganti Password\n");
-        printf("4. Keluar\n");
-        printf("Pilih menu (1-4): ");
+        printf("\n======== Menu User ========\n");
+        printf("||  1. Sub Menu Impor     ||\n");
+        printf("||  2. Sub Menu Ekspor    ||\n");
+        printf("||  3. Ganti Password     ||\n");
+        printf("||  4. Keluar             ||\n");
+        printf("============================\n");
+        printf("    Pilih menu (1-4): ");
         scanf("%d", &pilihan);
+        system("cls");
 
         switch (pilihan) {
             case 1:
@@ -749,4 +777,7 @@ void gantiPasswordUser() {
     fclose(file);
 
     printf("Password berhasil diganti.\n");
+
+    system("pause");
+    system("cls");
 }
