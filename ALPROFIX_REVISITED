@@ -85,7 +85,7 @@ int main() {
 
     do {
     system("cls");
-    printf("\n===== SELAMAT DATANG DI SITEM EKSPOR-IMPOR =====\n");
+    printf("\n===== SELAMAT DATANG DI SISTEM EKSPOR-IMPOR =====\n");
     printf("||  1. Pengguna Admin                         ||\n");
     printf("||  2. Pengguna User                          ||\n");
     printf("||  3. Keluar                                 ||\n");
