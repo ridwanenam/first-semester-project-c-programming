@@ -30,12 +30,10 @@ struct Laundry {
 struct InfoPelanggan {
     char username[50];
     int banyakSetoran;
-}; // Untuk void lihatHistoriPelanggan
+}; 
 
-// Variabel global
-int pelangganIndexLogin = -1; // Variabel global untuk menyimpan indeks pelanggan yang sedang login
+int pelangganIndexLogin = -1; 
 
-// Urutan deklarasi fungsi dengan fungsi-fungsinya
 void bersihkanLayar();
 
 void simpanDataPelanggan(struct Pelanggan *pelanggan, int jumlahPelanggan);
@@ -64,15 +62,12 @@ void lihatHistoriPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *data
 void tampilkanMenuAdmin();
 void tampilkanMenuPelanggan();
 
-// Fungsi utama
 int main() {
-    // Inisialisasi data dan variabel global
     struct Pelanggan dataPelanggan[MAX_PELANGGAN];
     struct Laundry dataLaundry[MAX_LAUNDRY];
     int jumlahPelanggan = 0;
     int jumlahLaundry = 0;
 
-    // Membaca data pelanggan dan laundry dari file
     bacaDataPelanggan(dataPelanggan, &jumlahPelanggan);
     bacaDataLaundry(dataLaundry, &jumlahLaundry);
 
@@ -92,7 +87,6 @@ int main() {
                 loginAdmin(dataPelanggan, dataLaundry, &jumlahPelanggan, &jumlahLaundry);
                 break;
             case 2:
-                // Tampilkan opsi untuk pelanggan (login/daftar)
                 printf("Pilih opsi pelanggan:\n");
                 printf("1. Login\n");
                 printf("2. Daftar\n");
@@ -113,7 +107,6 @@ int main() {
                 }
                 break;
             case 3:
-                // Simpan data pelanggan dan laundry ke file sebelum keluar
                 simpanDataPelanggan(dataPelanggan, jumlahPelanggan);
                 simpanDataLaundry(dataLaundry, jumlahLaundry);
                 printf("Terima kasih telah menggunakan D'Laundry. Sampai jumpa!!!\n");
@@ -130,7 +123,6 @@ int main() {
 
 // ======Implementasi fungsi-fungsi ======
 void bersihkanLayar() {
-    // Membersihkan layar konsol
     system("clear || cls");
 }
 
@@ -182,7 +174,6 @@ void bacaDataLaundry(struct Laundry *laundry, int *jumlahLaundry) {
     fclose(fileLaundry);
 }
 
-// Fungsi loginAdmin dengan rekursif
 void loginAdmin(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, int *jumlahPelanggan, int *jumlahLaundry) {
     char username[50];
     char password[50];
@@ -213,7 +204,6 @@ void loginAdmin(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, in
         exit(0);
     }
 
-    // Tampilkan menu admin setelah login
     int opsiAdmin;
     do {
         tampilkanMenuAdmin();
@@ -242,7 +232,6 @@ void loginAdmin(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, in
     } while (opsiAdmin != 5);
 }
 
-// Fungsi loginPelanggan dengan rekursif
 void loginPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, int *jumlahPelanggan, int *jumlahLaundry) {
     char username[50];
     char password[50];
@@ -260,7 +249,7 @@ void loginPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry
         if (loginSuccess) {
             for (int i = 0; i < *jumlahPelanggan; i++) {
                 if (strcmp(dataPelanggan[i].username, username) == 0) {
-                    pelangganIndexLogin = i; // Menyimpan indeks pelanggan yang sedang login
+                    pelangganIndexLogin = i; 
                     break;
                 }
             }
@@ -279,7 +268,6 @@ void loginPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry
         exit(0);
     }
 
-    // Tampilkan menu pelanggan setelah login
     int opsiPelanggan;
     do {
         tampilkanMenuPelanggan();
@@ -308,12 +296,10 @@ void loginPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry
 }
 
 
-// Fungsi daftarPelanggan dengan rekursif
 void daftarPelanggan(struct Pelanggan *dataPelanggan, int *jumlahPelanggan) {
     printf("Masukkan username: ");
     scanf("%s", dataPelanggan[*jumlahPelanggan].username);
 
-    // Validasi username, pastikan belum ada yang menggunakan
     while (cekUsernamePelanggan(dataPelanggan, *jumlahPelanggan, dataPelanggan[*jumlahPelanggan].username)) {
         printf("Username sudah digunakan. Masukkan username lain: ");
         scanf("%s", dataPelanggan[*jumlahPelanggan].username);
@@ -325,7 +311,6 @@ void daftarPelanggan(struct Pelanggan *dataPelanggan, int *jumlahPelanggan) {
 
     (*jumlahPelanggan)++;
 
-    // Rekursi untuk menambah pelanggan baru atau keluar
     char tambahLagi;
     printf("Tambah pelanggan lagi? (y/n): ");
     scanf(" %c", &tambahLagi);
@@ -338,19 +323,19 @@ void daftarPelanggan(struct Pelanggan *dataPelanggan, int *jumlahPelanggan) {
 int cekUsernamePelanggan(struct Pelanggan *dataPelanggan, int jumlahPelanggan, const char *username) {
     for (int i = 0; i < jumlahPelanggan; i++) {
         if (strcmp(dataPelanggan[i].username, username) == 0) {
-            return 1; // True, username sudah ada
+            return 1; 
         }
     }
-    return 0; // False, username belum ada
+    return 0;
 }
 
 int cekLoginPelanggan(struct Pelanggan *dataPelanggan, int jumlahPelanggan, const char *username, const char *password) {
     for (int i = 0; i < jumlahPelanggan; i++) {
         if (strcmp(dataPelanggan[i].username, username) == 0 && strcmp(dataPelanggan[i].password, password) == 0) {
-            return 1; // True, login sukses
+            return 1; 
         }
     }
-    return 0; // False, login gagal
+    return 0; 
 }
 
 
@@ -387,11 +372,9 @@ void isiSaldo(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, int 
                 break;
         }
 
-        // Iterasi laundry untuk mengecek status dan mengurangi saldo jika selesai
         for (int i = 0; i < *jumlahLaundry; i++) {
             if (strcmp(dataPelanggan[pelangganIndexLogin].username, dataLaundry[i].jenis) == 0 &&
                 dataLaundry[i].status == SELESAI) {
-                // Kurangi saldo berdasarkan harga laundry yang sudah selesai
                 dataPelanggan[pelangganIndexLogin].saldo -= dataLaundry[i].harga;
                 printf("Saldo berkurang setelah laundry selesai. Saldo sekarang: %.2lf\n",
                        dataPelanggan[pelangganIndexLogin].saldo);
@@ -419,10 +402,8 @@ void setorLaundry(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, 
         return;
     }
 
-    // Memasukkan username pelanggan ke dalam dataLaundry
     strcpy(dataLaundry[*jumlahLaundry].username, dataPelanggan[pelangganIndexLogin].username);
 
-    // Menggunakan switch case untuk memilih jenis laundry
     printf("Pilih jenis laundry:\n");
     printf("===Cuci Kiloan===\n");
     printf("1. Cuci Kiloan Reguler\n");
@@ -485,10 +466,8 @@ void setorLaundry(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, 
     }
 
     if (jenis == 1 || jenis == 2) {
-        // Hitung harga total setelah hargaPerKilogram diinput
         dataLaundry[*jumlahLaundry].harga = dataLaundry[*jumlahLaundry].berat * hargaPerKilogram;
     } else if (jenis >= 3 && jenis <= 6) {
-        // Hitung harga total per item
         dataLaundry[*jumlahLaundry].harga = hargaPerItem * dataLaundry[*jumlahLaundry].jumlahItem;
     }
 
@@ -513,7 +492,6 @@ void lihatStatusLaundry(struct Pelanggan *dataPelanggan, struct Laundry *dataLau
     printf("Status Laundry untuk Pelanggan %s:\n", dataPelanggan[pelangganIndexLogin].username);
 
     for (int i = 0; i < jumlahLaundry; i++) {
-        // Membandingkan username pelanggan dengan dataLaundry
         if (strcmp(dataPelanggan[pelangganIndexLogin].username, dataLaundry[i].username) == 0) {
             printf("Laundry %d:\n", i + 1);
             printf("Status: ");
@@ -542,7 +520,6 @@ void lihatStatusLaundry(struct Pelanggan *dataPelanggan, struct Laundry *dataLau
         }
     }
 }
-
 
 void cekHarga() {
     printf("=== Cek Harga Laundry ===\n");
@@ -601,7 +578,6 @@ void hapusPelanggan(struct Pelanggan *dataPelanggan, int *jumlahPelanggan) {
     }
 
     if (indexPelanggan != -1) {
-        // Menghapus akun pelanggan
         if (indexPelanggan < (*jumlahPelanggan) - 1) {
             memmove(&dataPelanggan[indexPelanggan], &dataPelanggan[indexPelanggan + 1],
                     ((*jumlahPelanggan) - indexPelanggan - 1) * sizeof(struct Pelanggan));
@@ -637,7 +613,6 @@ void perbaruiStatusLaundry(struct Laundry *dataLaundry, struct Pelanggan *dataPe
 
     int found = 0;
     for (int i = 0; i < jumlahLaundry; i++) {
-        // Membandingkan username dengan dataLaundry
         if (strcmp(dataLaundry[i].username, username) == 0) {
             printf("Informasi Laundry Sebelum Diperbarui:\n");
             printf("Username: %s, Jenis: %s, ", dataLaundry[i].username, dataLaundry[i].jenis);
@@ -649,7 +624,6 @@ void perbaruiStatusLaundry(struct Laundry *dataLaundry, struct Pelanggan *dataPe
                 printf("Jumlah Item: %d, Status: %d, Harga: Rp. %.2lf\n", dataLaundry[i].jumlahItem, dataLaundry[i].status, dataLaundry[i].harga);
             }
 
-            // Memasukkan status baru
             printf("Masukkan status baru (0: belum dikonfirmasi, 1: sedang dikerjakan, 2: selesai): ");
             scanf("%d", &dataLaundry[i].status);
 
@@ -666,7 +640,6 @@ void perbaruiStatusLaundry(struct Laundry *dataLaundry, struct Pelanggan *dataPe
             printf("Status laundry pelanggan %s berhasil diperbarui.\n", username);
             found = 1;
 
-            // Simpan perubahan status ke dalam file
             simpanDataLaundry(dataLaundry, jumlahLaundry);
         }
     }
@@ -680,7 +653,6 @@ void perbaruiStatusLaundry(struct Laundry *dataLaundry, struct Pelanggan *dataPe
 void lihatHistoriPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *dataLaundry, int jumlahPelanggan, int jumlahLaundry) {
     printf("Histori Laundry Pelanggan yang Sudah Selesai:\n");
 
-    // Hitung banyaknya setoran laundry untuk setiap pelanggan
     struct InfoPelanggan infoPelanggan[jumlahPelanggan];
     for (int i = 0; i < jumlahPelanggan; i++) {
         infoPelanggan[i].banyakSetoran = 0;
@@ -698,7 +670,7 @@ void lihatHistoriPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *data
         }
     }
 
-    // Urutkan dataPelanggan berdasarkan banyaknya setoran laundry (Bubble Sort)
+    // Bubble Sort
     for (int i = 0; i < jumlahPelanggan - 1; i++) {
         for (int j = 0; j < jumlahPelanggan - i - 1; j++) {
             if (infoPelanggan[j].banyakSetoran < infoPelanggan[j + 1].banyakSetoran) {
@@ -709,12 +681,10 @@ void lihatHistoriPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *data
         }
     }
 
-    // Tampilkan hasil
     for (int i = 0; i < jumlahPelanggan; i++) {
         printf("Pelanggan: %s\n", infoPelanggan[i].username);
         printf("Banyaknya setoran laundry: %d\n", infoPelanggan[i].banyakSetoran);
 
-        // Tampilkan detail laundry
         for (int j = 0; j < jumlahLaundry; j++) {
             if (strcmp(dataLaundry[j].username, infoPelanggan[i].username) == 0 && dataLaundry[j].status == SELESAI) {
                 printf("Status: Selesai\n");
@@ -739,20 +709,20 @@ void lihatHistoriPelanggan(struct Pelanggan *dataPelanggan, struct Laundry *data
 
 void tampilkanMenuAdmin() {
     printf("Menu Admin:\n");
-    printf("1. Hapus Akun Customer\n"); // UDAH
-    printf("2. Lihat Pendapatan Laundry\n"); // UDAH
-    printf("3. Perbarui Status Laundry Customer\n"); // UDAH
-    printf("4. Lihat Histori Pelanggan\n"); // UDAH
+    printf("1. Hapus Akun Customer\n"); // done
+    printf("2. Lihat Pendapatan Laundry\n"); // done
+    printf("3. Perbarui Status Laundry Customer\n"); // done
+    printf("4. Lihat Histori Pelanggan\n"); // done
     printf("5. Simpan dan Keluar\n"); 
     printf("Masukkan pilihan Anda: ");
 }
 
 void tampilkanMenuPelanggan() {
     printf("Menu Pelanggan:\n");
-    printf("1. Isi Saldo atau Cek Saldo\n"); // UDAH
-    printf("2. Setor Laundry\n"); // UDAH
-    printf("3. Lihat Status Laundry\n"); // UDAH
-    printf("4. Cek Harga\n"); // UDAH
+    printf("1. Isi Saldo atau Cek Saldo\n"); // done
+    printf("2. Setor Laundry\n"); // done
+    printf("3. Lihat Status Laundry\n"); // done
+    printf("4. Cek Harga\n"); // done
     printf("5. Simpan dan Keluar\n"); 
     printf("Masukkan pilihan Anda: ");
 }
