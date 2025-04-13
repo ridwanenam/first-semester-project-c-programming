@@ -1,4 +1,4 @@
-# C Assignment
+# first-semester-project-c-programming
 == Archive ==
 
 
